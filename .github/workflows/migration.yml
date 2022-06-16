@@ -43,7 +43,7 @@ jobs:
         run: |
       
           echo "Cloning repo..."
-          git clone --mirror https://${{secrests.AZURE_DEVOPS_MIGRATION_PAT}}@dev.azure.com/bertington/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }} source
+          git clone --mirror https://${{secrets.AZURE_DEVOPS_MIGRATION_PAT}}@dev.azure.com/bertington/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }} source
           
           cd source
         
