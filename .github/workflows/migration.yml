@@ -29,9 +29,9 @@ jobs:
         run: |
           existed_in_remote=$(git ls-remote --heads origin migration)
           
-          echo "Blah Start" > $GITHUB_STEP_SUMMARY
-          git ls-remote --heads origin migration > $GITHUB_STEP_SUMMARY
-          echo "Blah End" > $GITHUB_STEP_SUMMARY
+          echo "Blah Start" >> $GITHUB_STEP_SUMMARY
+          git ls-remote --heads origin migration >> $GITHUB_STEP_SUMMARY
+          echo "Blah End" >> $GITHUB_STEP_SUMMARY
           
           if [[ -z "$existed_in_remote" ]]; then
               echo "::error::Migration branch already exists. Please delete this branch and run the workflow again"
@@ -63,7 +63,7 @@ jobs:
       - name: Print Diagram
         working-directory: target
         run: |
-          git log --all --decorate --oneline --graph --date=short --pretty="%ad - %s" > $GITHUB_STEP_SUMMARY
+          git log --all --decorate --oneline --graph --date=short --pretty="%ad - %s" >> $GITHUB_STEP_SUMMARY
     
       - name: Push Migration Changes
         working-directory: target
