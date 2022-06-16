@@ -22,12 +22,13 @@ jobs:
       - name: Check branch does not exist
         working-directory: target
         run: |
-          exists=`git show-ref refs/heads/migration` || echo "Crap"
+          exists=`git show-ref refs/heads/migration` || echo;
           
           if [ -n "$exists" ]; then
               echo 'branch exists!'
           else
               echo 'migration branch does not exist'
+          fi
           
       - run:  git clone --mirror ${{ inputs.source-repository }} source
       
