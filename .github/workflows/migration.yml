@@ -26,6 +26,7 @@ jobs:
           
           if [ -n "$exists" ]; then
               echo "::error::Migration branch already exists. Please delete this branch and run the workflow again"
+              exit 1
           else
               echo 'migration branch does not exist'
           fi
