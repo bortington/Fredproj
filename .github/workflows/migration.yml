@@ -38,6 +38,9 @@ jobs:
         working-directory: source
         
       - run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          
           git remote add source ../source --fetch --tags
           git checkout -b feature/migration
           git merge source/main --allow-unrelated-histories -X theirs
