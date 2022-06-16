@@ -65,4 +65,10 @@ jobs:
         working-directory: target
         if: ${{ !inputs.dry-run }}
         run: |
-          git push origin
+          git push --set-upstream origin migration
+          
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          title: 'DevOps Migration from ${{inputs.source-repository}}'
+          path: target
