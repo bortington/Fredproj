@@ -22,7 +22,7 @@ jobs:
       - name: Check branch does not exist
         working-directory: target
         run: |
-          _check_branch = $(git ls-remote --heads origin main)
+          _check_branch=$(git ls-remote --heads origin main)
           
           if [[ -z ${_check_branch} ]]; then
               echo "local: branch do not exist" > /dev/null 2>&1
