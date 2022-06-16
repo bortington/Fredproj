@@ -53,7 +53,7 @@ jobs:
       - name: Print Diagram
         working-directory: target
         run: |
-          git log --all --decorate --oneline --graph > ../log.txt
+          git log --all --decorate --oneline --graph > $GITHUB_STEP_SUMMARY
     
       - uses: actions/upload-artifact@v3
         with:
