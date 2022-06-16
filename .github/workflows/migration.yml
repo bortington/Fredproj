@@ -38,7 +38,9 @@ jobs:
           git fetch --all --tags
         working-directory: source
         
-      - run: |
+      - name: Merge source into target
+        working-directory: target
+        run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
           
@@ -47,4 +49,14 @@ jobs:
           git merge source/main --allow-unrelated-histories -X theirs
           git lfs fetch source --all
           git log
+        
+      - name: Print Diagram
         working-directory: target
+        run: |
+          git log --all --decorate --oneline --graph > ../log.txt
+    
+      - uses: actions/upload-artifact@v3
+        with:
+          name: git-log
+          path: log.txt
+
