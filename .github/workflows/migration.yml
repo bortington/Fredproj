@@ -47,7 +47,6 @@ jobs:
           
           git lfs fetch --all
           git fetch --all --tags
-        working-directory: source
         
       - name: Merge source into target
         working-directory: target
