@@ -5,6 +5,11 @@ on:
     inputs:
       source-repository:
         description: Git url for the repo being migrated. e.g. https://racwa@dev.azure.com/racwa/MRP/_git/VehiclesApi
+        required: true
+      dry-run:
+        description: Enables try run which will disable pushes
+        required: true
+        type: boolean
     
 jobs:
   clone-and-merge: # This job is run manually
@@ -48,15 +53,16 @@ jobs:
           git checkout -b migration
           git merge source/main --allow-unrelated-histories -X theirs
           git lfs fetch source --all
-          git log
+                    
+          git remote remove source
         
       - name: Print Diagram
         working-directory: target
         run: |
-          git log --all --decorate --oneline --graph > $GITHUB_STEP_SUMMARY
+          git log --all --decorate --oneline --graph --date=short --pretty="%C(yellow) %h %C(green) %ad %C(white) %s" > $GITHUB_STEP_SUMMARY
     
-      - uses: actions/upload-artifact@v3
-        with:
-          name: git-log
-          path: log.txt
-
+      - name: Push Migration Changes
+        working-directory: target
+        if: ${{ !inputs.dry-run }}
+        run: |
+          git push origin
