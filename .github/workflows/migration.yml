@@ -37,8 +37,6 @@ jobs:
           git fetch --all --tags
         working-directory: source
         
-      - run:  git clone ${{ env.TARGET_GIT_URL }} target
-      
       - run: |
           git remote add source ../source --fetch --tags
           git checkout -b feature/migration
