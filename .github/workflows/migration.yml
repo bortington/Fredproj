@@ -6,6 +6,9 @@ on:
       source-repository:
         description: Git url for the repo being migrated. e.g. https://racwa@dev.azure.com/racwa/MRP/_git/VehiclesApi
         required: true
+      devops-pat:
+        description: PAT for DevOps
+        required: true
       dry-run:
         description: Enables dry run which will disable any pushes and make no changes
         required: true
@@ -36,9 +39,13 @@ jobs:
               exit 1
           fi
           
-      - run:  git clone --mirror ${{ inputs.source-repository }} source
-      
       - run: |
+      
+          $B64Pat=`echo -n ${{inputs.devops-pat}} | base64`
+          
+          git config --global --add http.https://bertington@dev.azure.com/bertington/Fredproj/_git/Fredproj.extraHeader "AUTHORIZATION: Basic $B64Pat"
+          git clone --mirror ${{ inputs.source-repository }} source
+          
           git lfs fetch --all
           git fetch --all --tags
         working-directory: source
