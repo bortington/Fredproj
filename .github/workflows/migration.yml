@@ -43,4 +43,4 @@ jobs:
           git merge source/main --allow-unrelated-histories -X theirs
           git lfs fetch source --all
           git log
-        working-directory: source
+        working-directory: target
