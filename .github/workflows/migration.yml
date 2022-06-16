@@ -20,7 +20,7 @@ jobs:
           path: target
           
       - name: Check branch does not exist
-        working-directory: source
+        working-directory: target
         run: |
           _check_branch = $(git ls-remote --heads origin main)
           
