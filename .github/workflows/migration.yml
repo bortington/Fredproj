@@ -1,0 +1,43 @@
+name: Migration from Azure DevOps
+
+on:
+  workflow_dispatch:
+    inputs:
+      source-repository:
+        description: Git url for the repo being migrated. e.g. https://racwa@dev.azure.com/racwa/MRP/_git/VehiclesApi
+    
+jobs:
+  clone-and-merge: # This job is run manually
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' # We only want this job running from manual actions
+    env:
+      TARGET_GIT_URL: ${{env.GITHUB_SERVER_URL}}/${{env.GITHUB_REPOSITORY}}
+    steps:
+      - run: |
+          _check_branch = $(git ls-remote --heads origin main
+          
+          if [[ -z ${_check_branch} ]]; then
+              echo "local: branch do not exist" > /dev/null 2>&1
+          else
+              echo "local: Good lets continue" > /dev/null 2>&1
+          
+      - run:  git clone --mirror ${{ inputs.source-repository }} source
+      
+      - run: |
+          git lfs fetch --all
+          git fetch --all --tags
+        working-directory: source
+        
+      - run:  git clone ${{ env.TARGET_GIT_URL }} target
+      
+
+      - run: |
+          git remote add source ../source --fetch --tags
+          git checkout -b feature/migration
+          git merge source/main --allow-unrelated-histories -X theirs
+          git lfs fetch source --all
+          git log
+        working-directory: source
+        
+        
+
