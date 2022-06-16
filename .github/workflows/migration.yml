@@ -3,8 +3,6 @@ name: Migration from Azure DevOps
 on:
   workflow_dispatch:
     inputs:
-      source-repository:
-        description: Git url for the repo being migrated. e.g. https://racwa@dev.azure.com/racwa/MRP/_git/VehiclesApi
       azure-project:
         description: Azure project name. e.g. enter MRP for https://racwa@dev.azure.com/racwa/MRP/_git/VehiclesApi
         required: true
@@ -45,7 +43,7 @@ jobs:
         run: |
       
           echo "Cloning repo..."
-          git clone --mirror https://racwa@dev.azure.com/bertington/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }} source
+          git clone --mirror https://bertington@dev.azure.com/bertington/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }} source
           
           cd source
         
