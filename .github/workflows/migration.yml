@@ -49,7 +49,7 @@ jobs:
           
           #git config --global http.version HTTP/1.1
           #git config --global --add http.https://bertington@dev.azure.com.extraHeader "AUTHORIZATION: basic ${{secrets.AZURE_DEVOPS_MIGRATION_PAT64}}"
-          git clone -c http.extraHeader="AUTHORIZATION: basic ${{secrets.AZURE_DEVOPS_MIGRATION_PAT64}}" --mirror ${{ inputs.source-repository }} source
+          git clone -c http.extraHeader="AUTHORIZATION: bearer ${{secrets.AZURE_DEVOPS_MIGRATION_PAT}}" --mirror ${{ inputs.source-repository }} source
           
           #git clone --mirror ${{ inputs.source-repository }} source
           
