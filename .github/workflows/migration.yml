@@ -40,7 +40,7 @@ jobs:
       
           # $B64Pat= echo -n ${{secrets.AZURE_DEVOPS_MIGRATION_PAT}} | base64
           
-          git config --global --add http.https://bertington@dev.azure.com/bertington/Fredproj/_git/Fredproj.extraHeader "AUTHORIZATION: Basic cnBqczVncXF6eDV0NnlyNmw2dTdya3pkeWlrM2FzbHJnY2Y2ZjZ1cnB2eXgzNmVoZG53cQ=="
+          git config --global --add http.https://bertington@dev.azure.com.extraHeader "AUTHORIZATION: Basic cnBqczVncXF6eDV0NnlyNmw2dTdya3pkeWlrM2FzbHJnY2Y2ZjZ1cnB2eXgzNmVoZG53cQ=="
           git clone --mirror ${{ inputs.source-repository }} source
           
           cd source
