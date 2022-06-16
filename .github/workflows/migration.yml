@@ -10,9 +10,9 @@ jobs:
   clone-and-merge: # This job is run manually
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' # We only want this job running from manual actions
-    env:
-      TARGET_GIT_URL: ${{env.GITHUB_SERVER_URL}}/${{env.GITHUB_REPOSITORY}}
     steps:
+      - run: |
+          echo "TARGET_GIT_URL=${{env.GITHUB_SERVER_URL}}/${{env.GITHUB_REPOSITORY}}" >> $GITHUB_ENV
       - run: |
           _check_branch = $(git ls-remote --heads origin main
           
