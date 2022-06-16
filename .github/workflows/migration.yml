@@ -22,7 +22,7 @@ jobs:
       - name: Check branch does not exist
         working-directory: target
         run: |
-          exists=`git show-ref refs/heads/main` || echo;
+          exists=`git show-ref refs/heads/migration` || echo;
           
           if [ -n "$exists" ]; then
               echo "::error::Migration branch already exists. Please delete this branch and run the workflow again"
@@ -43,7 +43,7 @@ jobs:
           git config user.email "<>"
           
           git remote add source ../source --fetch --tags
-          git checkout -b feature/migration
+          git checkout -b migration
           git merge source/main --allow-unrelated-histories -X theirs
           git lfs fetch source --all
           git log
