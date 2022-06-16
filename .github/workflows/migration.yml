@@ -31,7 +31,8 @@ jobs:
           
           echo $exists
           
-          if [ -n "$exists" ]; then
+          if [ `git branch | egrep "^[[:space:]]+migration$"` ]
+          then
               echo "::error::Migration branch already exists. Please delete this branch and run the workflow again"
               exit 1
           else
