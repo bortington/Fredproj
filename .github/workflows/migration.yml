@@ -56,8 +56,11 @@ jobs:
                     
           git remote remove source
           
-          echo "### Tracked LFS Files:" >> $GITHUB_STEP_SUMMARY
+          echo "### LFS Filters:" >> $GITHUB_STEP_SUMMARY
           git lfs track >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Tracked Files:" >> $GITHUB_STEP_SUMMARY
+          git lfs ls-files --all >> $GITHUB_STEP_SUMMARY
         
       - name: Print Diagram
         working-directory: target
