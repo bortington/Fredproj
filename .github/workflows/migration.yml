@@ -22,10 +22,10 @@ jobs:
       - name: Check branch does not exist
         working-directory: target
         run: |
-          exists=`git show-ref refs/heads/migration` || echo;
+          exists=`git show-ref refs/heads/main` || echo;
           
           if [ -n "$exists" ]; then
-              echo 'branch exists!'
+              echo "::error::Migration branch already exists. Please delete this branch and run the workflow again"
           else
               echo 'migration branch does not exist'
           fi
