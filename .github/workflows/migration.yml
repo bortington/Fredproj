@@ -14,12 +14,19 @@ jobs:
       - run: |
           echo "TARGET_GIT_URL=${{env.GITHUB_SERVER_URL}}/${{env.GITHUB_REPOSITORY}}" >> $GITHUB_ENV
       - run: |
-          _check_branch = $(git ls-remote --heads origin main
+          _check_branch = $(git ls-remote --heads origin main)
           
           if [[ -z ${_check_branch} ]]; then
               echo "local: branch do not exist" > /dev/null 2>&1
           else
               echo "local: Good lets continue" > /dev/null 2>&1
+              
+          exists=`git show-ref refs/heads/migration`
+          
+          if [ -n "$exists" ]; then
+              echo 'branch exists!'
+          else
+              echo 'migration branch does not exist'
           
       - run:  git clone --mirror ${{ inputs.source-repository }} source
       
@@ -30,7 +37,6 @@ jobs:
         
       - run:  git clone ${{ env.TARGET_GIT_URL }} target
       
-
       - run: |
           git remote add source ../source --fetch --tags
           git checkout -b feature/migration
@@ -38,6 +44,3 @@ jobs:
           git lfs fetch source --all
           git log
         working-directory: source
-        
-        
-
