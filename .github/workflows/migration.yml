@@ -45,7 +45,7 @@ jobs:
           git lfs --version
           
           #git config --global http.version HTTP/1.1
-          # git config --global --add http.https://bertington@dev.azure.com.extraHeader "AUTHORIZATION: Basic cnBqczVncXF6eDV0NnlyNmw2dTdya3pkeWlrM2FzbHJnY2Y2ZjZ1cnB2eXgzNmVoZG53cQ=="
+          git config --global --add http.https://bertington@dev.azure.com.extraHeader "AUTHORIZATION: bearer cnBqczVncXF6eDV0NnlyNmw2dTdya3pkeWlrM2FzbHJnY2Y2ZjZ1cnB2eXgzNmVoZG53cQ=="
           # git clone -c http.extraHeader="AUTHORIZATION: basic cnBqczVncXF6eDV0NnlyNmw2dTdya3pkeWlrM2FzbHJnY2Y2ZjZ1cnB2eXgzNmVoZG53cQ==" --mirror ${{ inputs.source-repository }} source
           
           echo "Cloning repo..."
