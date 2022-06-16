@@ -1,0 +1,20 @@
+name: 1.0.0$(Rev:.r)
+trigger:
+- main
+- feature/*
+
+pool:
+  vmImage: 'windows-2022'
+
+resources:
+  repositories:
+  - repository: templates
+    type: git # git for Azure repos, github for github
+    name: Fredproj/FredShared
+
+jobs:
+- template: CodacyCodeCoverage.yml@templates
+  parameters:
+    CodacyProjectPath: badbort/Fredproj
+    CodacyProjectName: Fredproj
+    CodacyOrganizationProvider: gh

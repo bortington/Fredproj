@@ -1,0 +1,146 @@
+
+trigger:
+- main
+- feature/*
+
+pool:
+  vmImage: 'windows-2022'
+
+variables:
+  BuildPlatform: 'any cpu' 
+  BuildConfiguration: 'release'
+  CODACY_ORGANIZATION_PROVIDER : gh
+  CODACY_USERNAME : badbort
+  CODACY_PROJECT_NAME : Fredproj
+
+steps:
+
+# - task: AzureKeyVault@2
+#   displayName: (PipelineDecorator) Codacy Vault Secrets
+#   inputs:
+#     azureSubscription: 'Azure subscription 1(bd8e250a-66a6-4038-acd8-0d6aced3e3c8)'
+#     KeyVaultName: 'bortington-test-vault'
+#     SecretsFilter: 'CODACY-API-TOKEN'
+#     RunAsPreJob: false
+
+# - task: PowerShell@2
+#   displayName: Add project $(CODACY_REPO_PATH) to Codacy $(CODACY_ORGANIZATION_PROVIDER) Provider
+#   condition: variables.CODACY_REPO_PATH
+#   inputs:
+#     targetType: 'inline'
+#     pwsh: true
+#     script: |
+#       $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+#       $headers.Add("api-token", "$(CODACY-API-TOKEN)")
+#       $headers.Add("caller", "string")
+#       $headers.Add("Content-Type", "application/json")
+
+#       $body = "{
+#       `n  `"repositoryFullPath`": `"$(CODACY_REPO_PATH)`",
+#       `n  `"provider`": `"$(CODACY_ORGANIZATION_PROVIDER)`"
+#       `n}"
+
+#       try {
+#         $response = Invoke-RestMethod 'https://app.codacy.com/api/v3/repositories' -Method 'POST' -Headers $headers -Body $body -SkipHttpErrorCheck
+#       } catch [System.Net.WebException] {
+#         Write-Host "An exception was caught: $($_.Exception.Message)"
+#       }
+
+#       $statusCodeInt = [int]$response.BaseResponse.StatusCode
+
+#       Write-Host $statusCodeInt
+#       Write-Host $response
+#       Write-Host $response.StatusCode
+      
+#       $response | ConvertTo-Json
+
+- script: 'echo Hello, world! Bert token: $(BERT_TOKEN)'
+  displayName: 'Variable Group Test.'
+
+- script: 'echo Conditional step. Codacy detected! Codacy token: $(CODACY_PROJECT_TOKEN)'
+  displayName: 'Conditional step'
+  condition: variables.CODACY_PROJECT_TOKEN
+
+- script: |
+    echo Add other tasks to build, test, and deploy your project.
+    echo See https://aka.ms/yaml
+  displayName: 'Run a multi-line script'
+
+- ${{ if variables.CODACY_PROJECT_TOKEN }}:
+  - script: 'echo Hello, we have a codacy project token defined!  $(CODACY_PROJECT_TOKEN)'
+- ${{ else }}:
+  - script: 'echo No codacy project token defined sadface. CODACY_PROJECT_TOKEN: $(CODACY_PROJECT_TOKEN)'
+
+- ${{ if containsValue(variables.*.key, 'CODACY_PROJECT_TOKEN') }}:
+  - script: 'echo We got codacy in variables'
+    displayName: Variables contains codacy key
+    
+- task: NuGetToolInstaller@1
+  displayName: 'Install Nuget'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet restore'
+  inputs:
+    command: 'restore'
+    projects: '**/*.csproj'
+    feedsToUse: 'select'
+
+# - task: AzureKeyVault@2
+#   displayName: (PipelineDecorator) Codacy Vault Secrets
+#   inputs:
+#     azureSubscription: 'Azure subscription 1(bd8e250a-66a6-4038-acd8-0d6aced3e3c8)'
+#     KeyVaultName: 'bortington-test-vault'
+#     SecretsFilter: 'CODACY-API-TOKEN'
+#     RunAsPreJob: false
+
+# # - script: >
+# #     curl --location --request POST 'https://app.codacy.com/api/v3/repositories' --header 'api-token: $(CODACY-API-TOKEN)' --header 'caller: string' --header 'Content-Type: application/json' --data-raw '{\"repositoryFullPath\": \"$(CODACY_REPO_PATH)\",\"provider\": \"$(CODACY_ORGANIZATION_PROVIDER)\"}'
+# #   displayName: Create Codacy Project
+
+# - task: PowerShell@2
+#   displayName: Add project $(CODACY_REPO_PATH) to Codacy $(CODACY_ORGANIZATION_PROVIDER) Provider
+#   inputs:
+#     targetType: inline
+#     script: |
+#       $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+#       $headers.Add("api-token", "$(CODACY-API-TOKEN)")
+#       $headers.Add("caller", "string")
+#       $headers.Add("Content-Type", "application/json")
+
+#       $body = "{
+#       `n  `"repositoryFullPath`": `"$(CODACY_REPO_PATH)`",
+#       `n  `"provider`": `"$(CODACY_ORGANIZATION_PROVIDER)`"
+#       `n}"
+
+#       $response = Invoke-RestMethod 'https://app.codacy.com/api/v3/repositories' -Method 'POST' -Headers $headers -Body $body
+#       $response | ConvertTo-Json
+
+# - ${{ if variables.CODACY_ORGANIZATION_PROVIDER }}:
+#   - task: VSBuild@1
+#     displayName: 'Build solution **\*.sln'
+#     inputs:
+#       msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(Build.artifactstagingdirectory)\\"'
+#       platform: '$(BuildPlatform)'
+#       configuration: '$(BuildConfiguration)'
+
+#   - task: DotNetCoreCLI@2
+#     displayName: '(Decorator) Test and Code Coverage'
+#     inputs:
+#       command: test
+#       projects: '**/*Test*.csproj'
+#       arguments: '--configuration $(BuildConfiguration) --collect "Code coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura'
+
+#   - task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@5
+#     displayName: 'Generate Test Report'
+#     inputs:
+#       reports: '**/coverage.cobertura.xml'
+
+#   - task: Bash@3
+#     displayName: 'Upload Code Coverage Report to Codacy'
+#     inputs:
+#       targetType: 'inline'
+#       script: 'bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coveragereport/Cobertura.xml'
+#     env:
+#       CODACY_API_TOKEN: $(CODACY-API-TOKEN)
+# - ${{ else }}:
+#   - script: 'echo No codacy api token specified'
