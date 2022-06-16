@@ -13,7 +13,15 @@ jobs:
     steps:
       - run: |
           echo "TARGET_GIT_URL=${{env.GITHUB_SERVER_URL}}/${{env.GITHUB_REPOSITORY}}" >> $GITHUB_ENV
-      - run: |
+          
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: target
+          
+      - name: Check branch does not exist
+        working-directory: source
+        run: |
           _check_branch = $(git ls-remote --heads origin main)
           
           if [[ -z ${_check_branch} ]]; then
