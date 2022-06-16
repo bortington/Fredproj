@@ -29,6 +29,8 @@ jobs:
         run: |
           exists=`git show-ref refs/heads/migration` || echo;
           
+          echo $exists
+          
           if [ -n "$exists" ]; then
               echo "::error::Migration branch already exists. Please delete this branch and run the workflow again"
               exit 1
@@ -59,7 +61,7 @@ jobs:
       - name: Print Diagram
         working-directory: target
         run: |
-          git log --all --decorate --oneline --graph --date=short --pretty="%C(yellow) %h %C(green) %ad %C(white) %s" > $GITHUB_STEP_SUMMARY
+          git log --all --decorate --oneline --graph --date=short --pretty="%ad - %s" > $GITHUB_STEP_SUMMARY
     
       - name: Push Migration Changes
         working-directory: target
