@@ -29,6 +29,10 @@ jobs:
         run: |
           existed_in_remote=$(git ls-remote --heads origin migration)
           
+          echo "Blah Start" > $GITHUB_STEP_SUMMARY
+          git ls-remote --heads origin migration > $GITHUB_STEP_SUMMARY
+          echo "Blah End" > $GITHUB_STEP_SUMMARY
+          
           if [[ -z "$existed_in_remote" ]]; then
               echo "::error::Migration branch already exists. Please delete this branch and run the workflow again"
               exit 1
