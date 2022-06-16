@@ -69,7 +69,7 @@ jobs:
         working-directory: target
         if: ${{ !inputs.dry-run }}
         run: |
-          git push --set-upstream origin migration
+          git push --follow-tags --set-upstream origin migration
           
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
