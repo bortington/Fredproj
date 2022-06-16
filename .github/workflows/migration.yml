@@ -35,6 +35,10 @@ jobs:
               echo "::error::Migration branch already exists. Please delete this branch and run the workflow again"
               exit 1
           fi
+      
+      - uses: de-vri-es/setup-git-credentials@v2
+        with:
+          credentials: ${{secrets.AZURE_DEVOPS_MIGRATION_GIT_CREDENTIALS}}
           
       - shell: bash
         run: |
@@ -49,9 +53,9 @@ jobs:
           
           #git config --global http.version HTTP/1.1
           #git config --global --add http.https://bertington@dev.azure.com.extraHeader "AUTHORIZATION: basic ${{secrets.AZURE_DEVOPS_MIGRATION_PAT64}}"
-          git clone -c http.extraHeader="AUTHORIZATION: bearer ${{secrets.AZURE_DEVOPS_MIGRATION_PAT}}" --mirror ${{ inputs.source-repository }} source
+          #git clone -c http.extraHeader="AUTHORIZATION: bearer ${{secrets.AZURE_DEVOPS_MIGRATION_PAT}}" --mirror ${{ inputs.source-repository }} source
           
-          #git clone --mirror ${{ inputs.source-repository }} source
+          git clone --mirror ${{ inputs.source-repository }} source
           
           cd source
           
