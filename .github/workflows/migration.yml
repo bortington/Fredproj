@@ -27,8 +27,9 @@ jobs:
       - name: Check branch does not exist
         working-directory: target
         run: |
-          if git ls-remote --exit-code migration > /dev/null;
-          then
+          existed_in_remote=$(git ls-remote --heads origin migration)
+          
+          if [[ -z ${existed_in_remote} ]]; then
               echo "::error::Migration branch already exists. Please delete this branch and run the workflow again"
               exit 1
           else
