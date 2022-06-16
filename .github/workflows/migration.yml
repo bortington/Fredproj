@@ -13,8 +13,7 @@ on:
     
 jobs:
   clone-and-merge: # This job is run manually
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' # We only want this job running from manual actions
+    runs-on: windows-latest
     steps:
       - run: |
           echo "TARGET_GIT_URL=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" >> $GITHUB_ENV
