@@ -44,12 +44,13 @@ jobs:
       
           echo "Cloning repo..."
           git clone --mirror https://rpjs5gqqzx5t6yr6l6u7rkzdyik3aslrgcf6f6urpvyx36ehdnwq@dev.azure.com/bertington/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }} source
+         
+          cd source
           git fetch --all --tags
           
           echo "Fetching lfs content"
           git lfs fetch --all
           
-          cd source
         
       - name: Merge source into target
         working-directory: target
