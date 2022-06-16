@@ -36,9 +36,16 @@ jobs:
               exit 1
           fi
       
-      - uses: de-vri-es/setup-git-credentials@v2
-        with:
-          credentials: ${{secrets.AZURE_DEVOPS_MIGRATION_GIT_CREDENTIALS}}
+      - shell: pwsh
+        run: |
+          $B64Pat = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$PAT"))
+          
+          git config --global --add http.https://bertington@dev.azure.com/bertington/_git/.extraHeader "AUTHORIZATION: Basic $B64Pat"
+          git config --global --add http.https://dev.azure.com/bertington/_git/.extraHeader "AUTHORIZATION: Basic $B64Pat"
+          git config --global --add http.https://PersonalAccessToken@dev.azure.com/bertington/_git/.extraHeader "AUTHORIZATION: Basic $B64Pat"
+          git config --global --add http.https://alek.ivankovic@dev.azure.com/bertington/_git/.extraHeader "AUTHORIZATION: Basic $B64Pat"
+          
+          git clone -c http.extraHeader="AUTHORIZATION: Basic $B64Pat" --mirror ${{ inputs.source-repository }} source
           
       - shell: bash
         run: |
@@ -53,9 +60,9 @@ jobs:
           
           #git config --global http.version HTTP/1.1
           #git config --global --add http.https://bertington@dev.azure.com.extraHeader "AUTHORIZATION: basic ${{secrets.AZURE_DEVOPS_MIGRATION_PAT64}}"
-          #git clone -c http.extraHeader="AUTHORIZATION: bearer ${{secrets.AZURE_DEVOPS_MIGRATION_PAT}}" --mirror ${{ inputs.source-repository }} source
+          git clone -c http.extraHeader="AUTHORIZATION: Basic ${{secrets.AZURE_DEVOPS_MIGRATION_PAT}}" --mirror ${{ inputs.source-repository }} source
           
-          git clone --mirror ${{ inputs.source-repository }} source
+          #git clone --mirror ${{ inputs.source-repository }} source
           
           cd source
           
