@@ -5,6 +5,11 @@ on:
     inputs:
       source-repository:
         description: Git url for the repo being migrated. e.g. https://racwa@dev.azure.com/racwa/MRP/_git/VehiclesApi
+      azure-project:
+        description: Azure project name. e.g. enter MRP for https://racwa@dev.azure.com/racwa/MRP/_git/VehiclesApi
+        required: true
+      azure-repo:
+        description: Name of the repo, e.g. enter VehiclesApi for https://racwa@dev.azure.com/racwa/MRP/_git/VehiclesApi
         required: true
       dry-run:
         description: Enables dry run which will disable any pushes and make no changes
@@ -35,42 +40,14 @@ jobs:
               echo "::error::Migration branch already exists. Please delete this branch and run the workflow again"
               exit 1
           fi
-      
-      - shell: pwsh
-        run: |
-          $B64Pat = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes(":$PAT"))
-          
-          git config --global --add http.https://bertington@dev.azure.com/bertington/_git/.extraHeader "AUTHORIZATION: Basic $B64Pat"
-          git config --global --add http.https://dev.azure.com/bertington/_git/.extraHeader "AUTHORIZATION: Basic $B64Pat"
-          git config --global --add http.https://PersonalAccessToken@dev.azure.com/bertington/_git/.extraHeader "AUTHORIZATION: Basic $B64Pat"
-          git config --global --add http.https://alek.ivankovic@dev.azure.com/bertington/_git/.extraHeader "AUTHORIZATION: Basic $B64Pat"
-          
-          git -c http.extraHeader="AUTHORIZATION: Basic $B64Pat" clone --mirror ${{ inputs.source-repository }} source
           
       - shell: bash
         run: |
       
-          # $B64Pat= echo -n ${{secrets.AZURE_DEVOPS_MIGRATION_PAT}} | base64
-          
-          git --version
-          
-          git lfs --version
-          
           echo "Cloning repo..."
-          
-          #git config --global http.version HTTP/1.1
-          #git config --global --add http.https://bertington@dev.azure.com.extraHeader "AUTHORIZATION: basic ${{secrets.AZURE_DEVOPS_MIGRATION_PAT64}}"
-          git clone -c http.extraHeader="AUTHORIZATION: Basic ${{secrets.AZURE_DEVOPS_MIGRATION_PAT}}" --mirror ${{ inputs.source-repository }} source
-          
-          #git clone --mirror ${{ inputs.source-repository }} source
+          git clone --mirror https://racwa@dev.azure.com/bertington/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }} source
           
           cd source
-          
-          echo "Fetching lfs shit"
-          git lfs fetch --all
-          
-          echo "Fetching tags"
-          git fetch --all --tags
         
       - name: Merge source into target
         working-directory: target
@@ -81,15 +58,8 @@ jobs:
           git remote add source ../source --fetch --tags
           git checkout -b migration
           git merge source/main --allow-unrelated-histories -X theirs
-          git lfs fetch source --all
                     
           git remote remove source
-          
-          echo "### LFS Filters:" >> $GITHUB_STEP_SUMMARY
-          git lfs track >> $GITHUB_STEP_SUMMARY
-          
-          echo "### Tracked Files:" >> $GITHUB_STEP_SUMMARY
-          git lfs ls-files --all >> $GITHUB_STEP_SUMMARY
         
       - name: Print Diagram
         working-directory: target
@@ -106,5 +76,5 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
-          title: 'DevOps Migration from ${{inputs.source-repository}}'
+          title: 'DevOps Migration from ${{inputs.azure-project}}/${{inputs.azure-repo}}'
           path: target
