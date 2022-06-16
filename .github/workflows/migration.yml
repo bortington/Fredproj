@@ -6,9 +6,6 @@ on:
       source-repository:
         description: Git url for the repo being migrated. e.g. https://racwa@dev.azure.com/racwa/MRP/_git/VehiclesApi
         required: true
-      devops-pat:
-        description: PAT for DevOps
-        required: true
       dry-run:
         description: Enables dry run which will disable any pushes and make no changes
         required: true
