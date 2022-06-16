@@ -53,8 +53,11 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
           
+          echo "Adding source repo as new remote"
           git remote add source ../source --fetch --tags
           git checkout -b migration
+          
+          echo "Merging source main branch into destination"
           git merge source/main --allow-unrelated-histories -X theirs
                     
           git remote remove source
