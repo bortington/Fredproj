@@ -34,10 +34,10 @@ jobs:
           echo "Blah End" >> $GITHUB_STEP_SUMMARY
           
           if [[ -z "$existed_in_remote" ]]; then
+              echo 'Migration branch does not exist. Continuing'
+          else
               echo "::error::Migration branch already exists. Please delete this branch and run the workflow again"
               exit 1
-          else
-              echo 'Migration branch does not exist. Continuing'
           fi
           
       - run:  git clone --mirror ${{ inputs.source-repository }} source
