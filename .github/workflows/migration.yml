@@ -25,6 +25,7 @@ jobs:
           
       - name: Check branch does not exist
         working-directory: target
+        shell: bash
         run: |
           migrationExists=$(git ls-remote --heads origin migration)
           
@@ -35,7 +36,8 @@ jobs:
               exit 1
           fi
           
-      - run: |
+      - shell: bash
+        run: |
       
           # $B64Pat= echo -n ${{secrets.AZURE_DEVOPS_MIGRATION_PAT}} | base64
           
