@@ -7,7 +7,7 @@ on:
         description: Git url for the repo being migrated. e.g. https://racwa@dev.azure.com/racwa/MRP/_git/VehiclesApi
         required: true
       dry-run:
-        description: Enables try run which will disable pushes
+        description: Enables dry run which will disable any pushes and make no changes
         required: true
         type: boolean
     
@@ -27,16 +27,12 @@ jobs:
       - name: Check branch does not exist
         working-directory: target
         run: |
-          exists=`git show-ref refs/heads/migration` || echo;
-          
-          echo $exists
-          
-          if [ `git branch | egrep "^[[:space:]]+migration$"` ]
+          if git ls-remote --exit-code migration > /dev/null;
           then
               echo "::error::Migration branch already exists. Please delete this branch and run the workflow again"
               exit 1
           else
-              echo 'migration branch does not exist'
+              echo 'Migration branch does not exist. Continuing'
           fi
           
       - run:  git clone --mirror ${{ inputs.source-repository }} source
