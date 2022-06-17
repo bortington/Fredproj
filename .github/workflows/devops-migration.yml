@@ -104,14 +104,13 @@ jobs:
       - name: Create Pull Request
         if: ${{ inputs.push-changes }}
         working-directory: target
+        env:
+          GITHUB_TOKEN: ${{ secrets.MIGRATION_GITHUB_TOKEN }}
         run: |
-          # Use the secrets token instead of default workflow token since we are creating a PR in a different work
-          export GITHUB_TOKEN=${{ secrets.MIGRATION_GITHUB_TOKEN }}
-        
           gh pr create \
             --title "DevOps Migration from ${{inputs.azure-project}}/${{inputs.azure-repo}}" \
             --body "Automated PR from Migration Workflow" \
             --draft \
             --repo ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
           /
-          
+        
