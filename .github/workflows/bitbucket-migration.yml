@@ -42,7 +42,7 @@ jobs:
           appToken=${{secrets.BITBUCKET_MIGRATION_PAT}}
           bbUsername=${{secrets.BITBUCKET_MIGRATION_USERNAME}}
           
-          gitUrl=https://$bbUsername:$appToken@bitbucket.org/aleksstuff/${{inputs.bitbucket-repo}.git
+          gitUrl=https://$bbUsername:$appToken@bitbucket.org/aleksstuff/${{inputs.bitbucket-repo}}.git
           
           echo "Cloning source repo from $gitUrl"
           
