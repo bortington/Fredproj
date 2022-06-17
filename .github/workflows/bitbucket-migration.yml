@@ -68,6 +68,9 @@ jobs:
           
           echo "Adding source repo as new remote"
           git remote add source ../source --fetch --tags
+          
+          echo "Fetching lfs content from source mirror repo..."
+          git lfs fetch source --all
           git checkout -b migration
           
           echo "Merging source main branch into destination"
