@@ -38,19 +38,16 @@ jobs:
           
       - shell: bash
         run: |
-      
-          echo "Cloning repo..."
           
           appToken=${{secrets.BITBUCKET_MIGRATION_PAT}}
-          #appToken=xPaQe6ryDzkkugCv8QWa
+          bbUsername=${{secrets.BITBUCKET_MIGRATION_USERNAME}}
           
-          blah=https://Bortoss:$appToken@bitbucket.org/aleksstuff/ld35.git
+          gitUrl=https://$bbUsername:$appToken@bitbucket.org/aleksstuff/${{inputs.bitbucket-repo}.git
           
-          echo $blah
+          echo "Cloning source repo from $gitUrl"
           
-          git clone $blah source
+          git clone --mirror $gitUrl source
           
-         
           cd source
           
           bleh=$(git rev-parse --abbrev-ref origin/HEAD)
@@ -63,14 +60,12 @@ jobs:
           sourceBranch=$(git branch -vv | grep -Po "^[\s\*]*\K[^\s]*(?=.*$(git branch -rl '*/HEAD' | grep -o '[^ ]\+$'))")
           echo "Source repository main branch: $sourceBranch"
           
-          echo "SOURCE_BRANCH=$sourceBranch"
           echo "SOURCE_BRANCH=$sourceBranch" >> $GITHUB_ENV
           
-          # git fetch --all --tags
+          git fetch --all --tags
           
           echo "Fetching lfs content"
-          # git lfs fetch --all
-          
+          git lfs fetch --all
         
       - name: Merge source into target
         working-directory: target
