@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          $devopsRepo='https://${{env.DEVOPS_ORG}}@dev.azure.com/${{env.DEVOPS_ORG}}/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }}'
+          devopsRepo='https://${{env.DEVOPS_ORG}}@dev.azure.com/${{env.DEVOPS_ORG}}/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }}'
           
           echo "DevOps Repo: $devopsRepo"
           
