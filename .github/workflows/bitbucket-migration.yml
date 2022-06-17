@@ -40,9 +40,16 @@ jobs:
         run: |
       
           echo "Cloning repo..."
-          git clone https://Bortoss:xPaQe6ryDzkkugCv8QWa@bitbucket.org/aleksstuff/ld35.git source
+          git clone https://Bortoss:${{secrets.BITBUCKET_MIGRATION_PAT}}@bitbucket.org/aleksstuff/ld35.git source
          
           cd source
+          
+          sourceBranch= git branch -vv | grep -Po "^[\s\*]*\K[^\s]*(?=.*$(git branch -rl '*/HEAD' | grep -o '[^ ]\+$'))"
+          echo $sourceBranch
+          
+          echo "SOURCE_BRANCH=$(echo git branch -vv | grep -Po "^[\s\*]*\K[^\s]*(?=.*$(git branch -rl '*/HEAD' | grep -o '[^ ]\+$'))")" >> $GITHUB_ENV
+          
+          
           # git fetch --all --tags
           
           echo "Fetching lfs content"
