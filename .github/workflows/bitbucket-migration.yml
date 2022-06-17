@@ -40,7 +40,7 @@ jobs:
         run: |
       
           echo "Cloning repo..."
-          git clone --mirror https://Bortoss:${{secretse.BITBUCKET_MIGRATION_PAT}}@bitbucket.org/Bortoss/${{ inputs.bitbucket-repo }}.git source
+          git clone --mirror https://Bortoss:${{secrets.BITBUCKET_MIGRATION_PAT}}@bitbucket.org/Bortoss/${{ inputs.bitbucket-repo }}.git source
          
           cd source
           git fetch --all --tags
