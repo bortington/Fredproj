@@ -50,13 +50,6 @@ jobs:
           
           cd source
           
-          bleh=$(git rev-parse --abbrev-ref origin/HEAD)
-          
-          echo "Bleh is $bleh"
-          echo `Backtick is $bleh`
-          echo `Backtick curly is ${bleh}`
-          echo "quote curly is ${bleh}"
-          
           sourceBranch=$(git branch -vv | grep -Po "^[\s\*]*\K[^\s]*(?=.*$(git branch -rl '*/HEAD' | grep -o '[^ ]\+$'))")
           echo "Source repository main branch: $sourceBranch"
           
