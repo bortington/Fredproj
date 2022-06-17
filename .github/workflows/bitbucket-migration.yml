@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       bitbucket-repo:
-        description: Name of the repo
+        description: Name of the BitBucket repo
         required: true
       github-repo:
         description: Name of the GitHub repo
