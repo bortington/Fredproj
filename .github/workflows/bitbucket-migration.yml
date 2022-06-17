@@ -40,7 +40,10 @@ jobs:
         run: |
       
           echo "Cloning repo..."
-          git clone https://Bortoss:${{secrets.BITBUCKET_MIGRATION_PAT}}@bitbucket.org/aleksstuff/ld35.git source
+          
+          appToken=${{secrets.BITBUCKET_MIGRATION_PAT}}
+          appToken=asdfasdf
+          git clone https://Bortoss:$appToken@bitbucket.org/aleksstuff/ld35.git source
          
           cd source
           
