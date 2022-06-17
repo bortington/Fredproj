@@ -4,16 +4,23 @@ on:
   workflow_dispatch:
     inputs:
       azure-project:
-        description: Azure project name. e.g. enter MRP for https://racwa@dev.azure.com/racwa/MRP/_git/VehiclesApi
+        description: Azure project name. e.g. enter MRP for dev.azure.com/racwa/MRP/_git/VehiclesApi
         required: true
       azure-repo:
-        description: Name of the repo, e.g. enter VehiclesApi for https://racwa@dev.azure.com/racwa/MRP/_git/VehiclesApi
+        description: Name of the repo in DevOps, e.g. enter VehiclesApi for dev.azure.com/racwa/MRP/_git/VehiclesApi
+        required: true
+      github-repo:
+        description: Name of the GitHub repo, e.g. VehiclesApi
         required: true
       dry-run:
         description: Enables dry run which will disable any pushes and make no changes
         required: true
         type: boolean
-    
+
+env:
+  MIGRATION_BRANCH: migration
+  GITHUB_ORG: bortington
+  
 jobs:
   clone-and-merge: # This job is run manually
     runs-on: ubuntu-latest
@@ -23,8 +30,10 @@ jobs:
           
       - uses: actions/checkout@v3
         with:
+          repository: ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
           fetch-depth: 0
           path: target
+          token: ${{ secrets.MIGRATION_GITHUB_TOKEN }}
           
       - name: Check branch does not exist
         working-directory: target
@@ -43,20 +52,19 @@ jobs:
         run: |
       
           echo "Cloning repo..."
-          #git clone --mirror https://rpjs5gqqzx5t6yr6l6u7rkzdyik3aslrgcf6f6urpvyx36ehdnwq@dev.azure.com/bertington/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }} source 
-          
           git clone -c http.extraHeader="AUTHORIZATION: Basic ${{secrets.AZURE_DEVOPS_MIGRATION_PAT64}}" --mirror https://bertington@dev.azure.com/bertington/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }} source
          
           cd source
-          git fetch --all --tags
-          
-          echo "Fetching lfs content"
-          git lfs fetch --all
           
           sourceBranch=$(git branch -vv | grep -Po "^[\s\*]*\K[^\s]*(?=.*$(git branch -rl '*/HEAD' | grep -o '[^ ]\+$'))")
           echo "Source repository main branch: $sourceBranch"
           
           echo "SOURCE_BRANCH=$sourceBranch" >> $GITHUB_ENV
+          
+          git fetch --all --tags
+          
+          echo "Fetching lfs content"
+          git lfs fetch --all
         
       - name: Merge source into target
         working-directory: target
@@ -66,12 +74,14 @@ jobs:
           
           echo "Adding source repo as new remote"
           git remote add source ../source --fetch --tags
+          
+          echo "Fetching lfs content from source mirror repo..."
           git lfs fetch source --all
-          git checkout -b migration
+          git checkout -b $MIGRATION_BRANCH
           
           echo "Merging source main branch into destination"
           git merge source/$SOURCE_BRANCH --allow-unrelated-histories -X theirs
-          
+                    
           git remote remove source
         
       - name: Print Diagram
