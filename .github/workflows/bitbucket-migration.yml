@@ -9,8 +9,8 @@ on:
       github-repo:
         description: Name of the GitHub repo
         required: true
-      dry-run:
-        description: Enables dry run which will disable any pushes and make no changes
+      push-changes:
+        description: 'When enabled the migration will be pushed to the github repo. When disable this will perform a dry run'
         required: true
         type: boolean
         
@@ -96,12 +96,18 @@ jobs:
     
       - name: Push Migration Changes
         working-directory: target
-        if: ${{ !inputs.dry-run }}
+        if: ${{ inputs.push-changes }}
         run: |
-          git push --follow-tags --set-upstream origin $MIGRATION_BRANCH
+          git push --follow-tags --set-upstream origin migration
           
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v4
-        with:
-          title: 'BitBucket Migration from ${{inputs.bitbucket-repo}}'
-          path: target
+        if: ${{ inputs.push-changes }}
+        working-directory: target
+        env:
+          GITHUB_TOKEN: ${{ secrets.MIGRATION_GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --title "DevOps Migration from ${{inputs.azure-project}}/${{inputs.azure-repo}}" \
+            --body "Automated PR from Migration Workflow" \
+            --draft \
+            --repo ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
