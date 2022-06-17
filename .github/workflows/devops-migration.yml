@@ -111,6 +111,6 @@ jobs:
             --title "DevOps Migration from ${{inputs.azure-project}}/${{inputs.azure-repo}}" \
             --body "Automated PR from Migration Workflow" \
             --draft \
-            --repo ${{env.GITHUB_ORG}}/${{env.github-repo}}
+            --repo ${{env.GITHUB_ORG}}/${{input.github-repo}}
           /
           
