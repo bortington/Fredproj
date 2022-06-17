@@ -12,21 +12,26 @@ on:
       github-repo:
         description: Name of the GitHub repo, e.g. VehiclesApi
         required: true
-      dry-run:
-        description: Enables dry run which will disable any pushes and make no changes
+      push-changes:
+        description: 'When enabled the migration will be pushed to the github repo. When disable this will perform a dry run'
         required: true
         type: boolean
 
 env:
   MIGRATION_BRANCH: migration
   GITHUB_ORG: bortington
+  DEVOPS_ORG: bertington
   
 jobs:
   clone-and-merge: # This job is run manually
     runs-on: ubuntu-latest
     steps:
       - run: |
-          echo "TARGET_GIT_URL=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" >> $GITHUB_ENV
+          $devopsRepo='https://${{env.DEVOPS_ORG}}@dev.azure.com/${{env.DEVOPS_ORG}}/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }}'
+          
+          echo "DevOps Repo: $devopsRepo"
+          
+          echo "SOURCE_GIT_URL=$devopsRepo" >> $GITHUB_ENV
           
       - uses: actions/checkout@v3
         with:
@@ -52,7 +57,7 @@ jobs:
         run: |
       
           echo "Cloning repo..."
-          git clone -c http.extraHeader="AUTHORIZATION: Basic ${{secrets.AZURE_DEVOPS_MIGRATION_PAT64}}" --mirror https://bertington@dev.azure.com/bertington/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }} source
+          git clone -c http.extraHeader="AUTHORIZATION: Basic ${{secrets.AZURE_DEVOPS_MIGRATION_PAT64}}" --mirror https://${{env.DEVOPS_ORG}}@dev.azure.com/${{env.DEVOPS_ORG}}/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }} source
          
           cd source
           
@@ -92,12 +97,21 @@ jobs:
     
       - name: Push Migration Changes
         working-directory: target
-        if: ${{ !inputs.dry-run }}
+        if: ${{ inputs.push-changes }}
         run: |
           git push --follow-tags --set-upstream origin migration
           
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
+        if: ${{ inputs.push-changes }}
         with:
           title: 'DevOps Migration from ${{inputs.azure-project}}/${{inputs.azure-repo}}'
-          path: target
+          token: ${{ secrets.MIGRATION_GITHUB_TOKEN }}
+          commit-message: Update report
+          committer: GitHub <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          signoff: false
+          branch: ${{env.MIGRATION_BRANCH}}
+          draft: true
+          body: |
+            Automatically generated PR after running migration from ${{inputs
