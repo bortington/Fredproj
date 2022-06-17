@@ -102,16 +102,15 @@ jobs:
           git push --follow-tags --set-upstream origin migration
           
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v4
         if: ${{ inputs.push-changes }}
-        with:
-          title: 'DevOps Migration from ${{inputs.azure-project}}/${{inputs.azure-repo}}'
-          token: ${{ secrets.MIGRATION_GITHUB_TOKEN }}
-          commit-message: Update report
-          committer: GitHub <noreply@github.com>
-          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          signoff: false
-          branch: ${{env.MIGRATION_BRANCH}}
-          draft: true
-          body: |
-            Automatically generated PR after running migration from ${{env.SOURCE_GIT_URL}}
+        run: |
+          # Use the secrets token instead of default workflow token since we are creating a PR in a different work
+          export GITHUB_TOKEN=${{ secrets.MIGRATION_GITHUB_TOKEN }}
+        
+          gh pr create \
+            --title "DevOps Migration from ${{inputs.azure-project}}/${{inputs.azure-repo}}" \
+            --body "Automated PR from Migration Workflow" \
+            --draft \
+            --repo ${{env.GITHUB_ORG}}/${{env.github-repo}}
+          /
+          
