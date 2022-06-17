@@ -1,0 +1,83 @@
+name: Migration from BitBucket Cloud
+
+on:
+  workflow_dispatch:
+    inputs:
+      bitbucket-repo:
+        description: Name of the repo
+        required: true
+      dry-run:
+        description: Enables dry run which will disable any pushes and make no changes
+        required: true
+        type: boolean
+    
+jobs:
+  clone-and-merge: # This job is run manually
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "TARGET_GIT_URL=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" >> $GITHUB_ENV
+          
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: target
+          
+      - name: Check branch does not exist
+        working-directory: target
+        shell: bash
+        run: |
+          migrationExists=$(git ls-remote --heads origin migration)
+          
+          if [[ -z "$migrationExists" ]]; then
+              echo 'Migration branch does not exist. Continuing'
+          else
+              echo "::error::Migration branch already exists. Please delete this branch and run the workflow again"
+              exit 1
+          fi
+          
+      - shell: bash
+        run: |
+      
+          echo "Cloning repo..."
+          git clone --mirror hgit clone https://bitbucket.org/Bortoss/${{ inputs.bitbucket-repo }}.git source
+         
+          cd source
+          git fetch --all --tags
+          
+          echo "Fetching lfs content"
+          git lfs fetch --all
+          
+        
+      - name: Merge source into target
+        working-directory: target
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          
+          echo "Adding source repo as new remote"
+          git remote add source ../source --fetch --tags
+          git checkout -b migration
+          
+          echo "Merging source main branch into destination"
+          git merge source/main --allow-unrelated-histories -X theirs
+                    
+          git remote remove source
+        
+      - name: git log graph
+        working-directory: target
+        run: |
+          echo "### Git Log:" >> $GITHUB_STEP_SUMMARY
+          git log --all --decorate --oneline --graph --date=short --pretty="%ad - %s" >> $GITHUB_STEP_SUMMARY
+    
+      - name: Push Migration Changes
+        working-directory: target
+        if: ${{ !inputs.dry-run }}
+        run: |
+          git push --follow-tags --set-upstream origin migration
+          
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          title: 'BitBucket Migration from ${{inputs.bitbucket-repo}}'
+          path: target
