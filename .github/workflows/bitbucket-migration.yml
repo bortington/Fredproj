@@ -28,9 +28,10 @@ jobs:
           
       - uses: actions/checkout@v3
         with:
-          name: ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
+          repository: ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
           fetch-depth: 0
           path: target
+          token: ${{ secrets.MIGRATION_GITHUB_TOKEN }}
           
       - name: Check branch does not exist
         working-directory: target
