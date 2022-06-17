@@ -54,10 +54,9 @@ jobs:
           cd source
           
           sourceBranch= git branch -vv | grep -Po "^[\s\*]*\K[^\s]*(?=.*$(git branch -rl '*/HEAD' | grep -o '[^ ]\+$'))"
-          echo $sourceBranch
+          echo "Source repository main branch: $sourceBranch"
           
-          echo "SOURCE_BRANCH=$(echo git branch -vv | grep -Po "^[\s\*]*\K[^\s]*(?=.*$(git branch -rl '*/HEAD' | grep -o '[^ ]\+$'))")" >> $GITHUB_ENV
-          
+          echo "SOURCE_BRANCH=$sourceBranch" >> $GITHUB_ENV
           
           # git fetch --all --tags
           
@@ -76,7 +75,7 @@ jobs:
           git checkout -b migration
           
           echo "Merging source main branch into destination"
-          git merge source/main --allow-unrelated-histories -X theirs
+          git merge source/$SOURCE_BRANCH --allow-unrelated-histories -X theirs
                     
           git remote remove source
         
