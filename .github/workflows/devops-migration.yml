@@ -112,5 +112,3 @@ jobs:
             --body "Automated PR from Migration Workflow" \
             --draft \
             --repo ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
-          /
-        
