@@ -6,6 +6,9 @@ on:
       bitbucket-repo:
         description: Name of the repo
         required: true
+      github-repo:
+        description: Name of the GitHub repo
+        required: true
       dry-run:
         description: Enables dry run which will disable any pushes and make no changes
         required: true
@@ -14,6 +17,7 @@ on:
 env:
   BITBUCKET_WORKSPACE: aleksstuff
   MIGRATION_BRANCH: migration
+  GITHUB_ORG: bortington
         
 jobs:
   migrate-bitbucket-to-github:
@@ -24,6 +28,7 @@ jobs:
           
       - uses: actions/checkout@v3
         with:
+          name: ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
           fetch-depth: 0
           path: target
           
