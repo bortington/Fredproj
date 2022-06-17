@@ -103,6 +103,7 @@ jobs:
           
       - name: Create Pull Request
         if: ${{ inputs.push-changes }}
+        working-directory: target
         run: |
           # Use the secrets token instead of default workflow token since we are creating a PR in a different work
           export GITHUB_TOKEN=${{ secrets.MIGRATION_GITHUB_TOKEN }}
