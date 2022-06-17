@@ -114,4 +114,4 @@ jobs:
           branch: ${{env.MIGRATION_BRANCH}}
           draft: true
           body: |
-            Automatically generated PR after running migration from ${{inputs
+            Automatically generated PR after running migration from ${{env.SOURCE_GIT_URL}}
