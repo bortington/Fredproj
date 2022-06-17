@@ -10,9 +10,13 @@ on:
         description: Enables dry run which will disable any pushes and make no changes
         required: true
         type: boolean
-    
+        
+env:
+  BITBUCKET_WORKSPACE: aleksstuff
+  MIGRATION_BRANCH: migration
+        
 jobs:
-  clone-and-merge: # This job is run manually
+  migrate-bitbucket-to-github:
     runs-on: ubuntu-latest
     steps:
       - run: |
@@ -42,7 +46,7 @@ jobs:
           appToken=${{secrets.BITBUCKET_MIGRATION_PAT}}
           bbUsername=${{secrets.BITBUCKET_MIGRATION_USERNAME}}
           
-          gitUrl=https://$bbUsername:$appToken@bitbucket.org/aleksstuff/${{inputs.bitbucket-repo}}.git
+          gitUrl=https://$bbUsername:$appToken@bitbucket.org/$BITBUCKET_WORKSPACE/${{inputs.bitbucket-repo}}.git
           
           echo "Cloning source repo from $gitUrl"
           
@@ -71,7 +75,7 @@ jobs:
           
           echo "Fetching lfs content from source mirror repo..."
           git lfs fetch source --all
-          git checkout -b migration
+          git checkout -b $MIGRATION_BRANCH
           
           echo "Merging source main branch into destination"
           git merge source/$SOURCE_BRANCH --allow-unrelated-histories -X theirs
@@ -88,7 +92,7 @@ jobs:
         working-directory: target
         if: ${{ !inputs.dry-run }}
         run: |
-          git push --follow-tags --set-upstream origin migration
+          git push --follow-tags --set-upstream origin $MIGRATION_BRANCH
           
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
