@@ -43,7 +43,7 @@ jobs:
           
           #appToken=${{secrets.BITBUCKET_MIGRATION_PAT}}
           
-          appToken=asdfasdf
+          appToken=xPaQe6ryDzkkugCv8QWa
           blah=https://Bortoss:$appToken@bitbucket.org/aleksstuff/ld35.git
           
           echo $blah
