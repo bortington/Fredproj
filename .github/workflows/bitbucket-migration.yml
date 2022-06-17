@@ -41,9 +41,9 @@ jobs:
       
           echo "Cloning repo..."
           
-          #appToken=${{secrets.BITBUCKET_MIGRATION_PAT}}
+          appToken=${{secrets.BITBUCKET_MIGRATION_PAT}}
+          #appToken=xPaQe6ryDzkkugCv8QWa
           
-          appToken=xPaQe6ryDzkkugCv8QWa
           blah=https://Bortoss:$appToken@bitbucket.org/aleksstuff/ld35.git
           
           echo $blah
