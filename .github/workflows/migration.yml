@@ -53,6 +53,10 @@ jobs:
           echo "Fetching lfs content"
           git lfs fetch --all
           
+          sourceBranch=$(git branch -vv | grep -Po "^[\s\*]*\K[^\s]*(?=.*$(git branch -rl '*/HEAD' | grep -o '[^ ]\+$'))")
+          echo "Source repository main branch: $sourceBranch"
+          
+          echo "SOURCE_BRANCH=$sourceBranch" >> $GITHUB_ENV
         
       - name: Merge source into target
         working-directory: target
@@ -62,11 +66,12 @@ jobs:
           
           echo "Adding source repo as new remote"
           git remote add source ../source --fetch --tags
+          git lfs fetch source --all
           git checkout -b migration
           
           echo "Merging source main branch into destination"
-          git merge source/main --allow-unrelated-histories -X theirs
-                    
+          git merge source/$SOURCE_BRANCH --allow-unrelated-histories -X theirs
+          
           git remote remove source
         
       - name: Print Diagram
