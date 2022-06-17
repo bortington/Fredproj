@@ -45,7 +45,7 @@ jobs:
           echo "Cloning repo..."
           #git clone --mirror https://rpjs5gqqzx5t6yr6l6u7rkzdyik3aslrgcf6f6urpvyx36ehdnwq@dev.azure.com/bertington/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }} source 
           
-          git clone -c http.extraHeader="AUTHORIZATION: bearer ${{secrets.AZURE_DEVOPS_MIGRATION_PAT64}}" --mirror https://dev.azure.com/bertington/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }} source
+          git clone -c http.extraHeader="AUTHORIZATION: Basic ${{secrets.AZURE_DEVOPS_MIGRATION_PAT64}}" --mirror https://bertington@dev.azure.com/bertington/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }} source
          
           cd source
           git fetch --all --tags
