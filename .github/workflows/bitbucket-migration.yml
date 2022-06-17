@@ -42,7 +42,12 @@ jobs:
           echo "Cloning repo..."
           
           appToken=asdfasdf
-          git clone https://Bortoss:$appToken@bitbucket.org/aleksstuff/ld35.git source
+          blah=https://Bortoss:$appToken@bitbucket.org/aleksstuff/ld35.git
+          
+          echo $blah
+          
+          git clone $blah source
+          
          
           cd source
           
