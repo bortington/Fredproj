@@ -9,8 +9,12 @@ on:
       github-repo:
         description: Name of the GitHub repo
         required: true
+      push-branches:
+        description: Migrate all branches.
+        required: true
+        type: boolean
       push-changes:
-        description: 'When enabled the migration will be pushed to the github repo. When disable this will perform a dry run'
+        description: 'Whether we will push changes. When disabled this will perform a dry run'
         required: true
         type: boolean
         
@@ -86,10 +90,27 @@ jobs:
           
           echo "Merging source main branch into destination"
           git merge source/$SOURCE_BRANCH --allow-unrelated-histories -X theirs
-                    
+
+          echo "Push branches: '${{inputs.push-branches}}'"
+
+          # Checkout all branch from source remote, excluding the main branch
+          if [ "${{inputs.push-branches}}" == "true" ]
+          then
+            echo "Checking out all branches from source repo"
+            
+            for remote in `git branch -r | grep source/ | grep -v $SOURCE_BRANCH | grep -oP 'source/\K.*'`
+            do 
+              git checkout $remote
+              echo "Checked out $remote"
+            done
+          fi
+
           git remote remove source
+          
+          # Checkout migration branch again for PR step later on
+          git checkout $MIGRATION_BRANCH
         
-      - name: git log graph
+      - name: Print Diagram
         working-directory: target
         run: |
           echo "### Git Log:" >> $GITHUB_STEP_SUMMARY
@@ -99,7 +120,8 @@ jobs:
         working-directory: target
         if: ${{ inputs.push-changes }}
         run: |
-          git push --follow-tags --set-upstream origin $MIGRATION_BRANCH
+          git push --follow-tags --set-upstream origin migration
+          git push --all origin
           
       - name: Create Pull Request
         if: ${{ inputs.push-changes }}
