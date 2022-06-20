@@ -12,6 +12,10 @@ on:
       github-repo:
         description: Name of the GitHub repo, e.g. VehiclesApi
         required: true
+      push-branches:
+        description: Enables migration of all branches.
+        required: true
+        type: boolean
       push-changes:
         description: 'When enabled the migration will be pushed to the github repo. When disable this will perform a dry run'
         required: true
@@ -30,7 +34,6 @@ jobs:
           devopsRepo='https://${{env.DEVOPS_ORG}}@dev.azure.com/${{env.DEVOPS_ORG}}/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }}'
           
           echo "DevOps Repo: $devopsRepo"
-          
           echo "SOURCE_GIT_URL=$devopsRepo" >> $GITHUB_ENV
           
       - uses: actions/checkout@v3
@@ -88,7 +91,16 @@ jobs:
           git merge source/$SOURCE_BRANCH --allow-unrelated-histories -X theirs
 
           # Checkout all branch from source remote, excluding the main branch
-          for remote in `git branch -r | grep source/ | grep -v $SOURCE_BRANCH | grep -oP 'source/\K.*'`; do git checkout $remote; done
+          if [ {{inputs.push-branches}} ]
+          then
+            echo "Checking out all branches from source repo"
+            
+            for remote in `git branch -r | grep source/ | grep -v $SOURCE_BRANCH | grep -oP 'source/\K.*'`
+            do 
+              git checkout $remote
+              echo "Checked out $remote"
+            done
+          fi
 
           git remote remove source
         
