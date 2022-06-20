@@ -103,6 +103,9 @@ jobs:
           fi
 
           git remote remove source
+          
+          # Checkout migration branch again for PR step later on
+          git checkout $MIGRATION_BRANCH
         
       - name: Print Diagram
         working-directory: target
