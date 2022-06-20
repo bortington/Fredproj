@@ -13,11 +13,11 @@ on:
         description: Name of the GitHub repo, e.g. VehiclesApi
         required: true
       push-branches:
-        description: Enables migration of all branches.
+        description: Migrate all branches.
         required: true
         type: boolean
       push-changes:
-        description: 'When enabled the migration will be pushed to the github repo. When disable this will perform a dry run'
+        description: 'Whether we will push changes. When disabled this will perform a dry run'
         required: true
         type: boolean
 
