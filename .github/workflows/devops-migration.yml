@@ -90,7 +90,7 @@ jobs:
           echo "Merging source main branch into destination"
           git merge source/$SOURCE_BRANCH --allow-unrelated-histories -X theirs
 
-          echo "Push branches: '{{inputs.push-branches}}'"
+          echo "Push branches: '${{inputs.push-branches}}'"
 
           # Checkout all branch from source remote, excluding the main branch
           if [ ${{inputs.push-branches}} ]
