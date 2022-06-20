@@ -60,8 +60,8 @@ jobs:
           git clone -c http.extraHeader="AUTHORIZATION: Basic ${{secrets.AZURE_DEVOPS_MIGRATION_PAT64}}" --mirror https://${{env.DEVOPS_ORG}}@dev.azure.com/${{env.DEVOPS_ORG}}/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }} source
          
           cd source
-          
-          sourceBranch=$(git branch -vv | grep -Po "^[\s\*]*\K[^\s]*(?=.*$(git branch -rl '*/HEAD' | grep -o '[^ ]\+$'))")
+
+          sourceBranch=$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')
           echo "Source repository main branch: '$sourceBranch'"
           
           echo "SOURCE_BRANCH=$sourceBranch" >> $GITHUB_ENV
