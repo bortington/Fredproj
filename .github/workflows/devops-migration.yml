@@ -93,7 +93,7 @@ jobs:
           echo "Push branches: '{{inputs.push-branches}}'"
 
           # Checkout all branch from source remote, excluding the main branch
-          if [ {{inputs.push-branches}} ]
+          if [ ${{inputs.push-branches}} ]
           then
             echo "Checking out all branches from source repo"
             
