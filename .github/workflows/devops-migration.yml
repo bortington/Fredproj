@@ -86,7 +86,10 @@ jobs:
           
           echo "Merging source main branch into destination"
           git merge source/$SOURCE_BRANCH --allow-unrelated-histories -X theirs
-                    
+
+          # Checkout all branch from source remote, excluding the main branch
+          for remote in `git branch -r | grep source/ | grep -v $SOURCE_BRANCH | grep -oP 'source/\K.*'`; do git checkout $remote; done
+
           git remote remove source
         
       - name: Print Diagram
@@ -100,7 +103,7 @@ jobs:
         if: ${{ inputs.push-changes }}
         run: |
           git push --follow-tags --set-upstream origin migration
-          git push origin "refs/remotes/origin/*:refs/heads/*"
+          git push --all origin
           
       - name: Create Pull Request
         if: ${{ inputs.push-changes }}
