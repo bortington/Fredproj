@@ -58,7 +58,6 @@ jobs:
           
           gitUrl=https://$bbUsername:$appToken@bitbucket.org/$BITBUCKET_WORKSPACE/${{inputs.bitbucket-repo}}.git
           
-          echo "SOURCE_GIT_URL=$gitUrl" >> $GITHUB_ENV
           echo "Cloning source repo from $gitUrl"
           
           git clone --mirror $gitUrl source
@@ -130,7 +129,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.MIGRATION_GITHUB_TOKEN }}
         run: |
           gh pr create \
-            --title "BitBucket Migration from ${{env.SOURCE_GIT_URL}}" \
+            --title "BitBucket Migration from ${{env.BITBUCKET_WORKSPACE}}/${{inputs.bitbucket-repo}}" \
             --body "Automated PR from Migration Workflow" \
             --draft \
             --repo ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
