@@ -100,6 +100,7 @@ jobs:
         if: ${{ inputs.push-changes }}
         run: |
           git push --follow-tags --set-upstream origin migration
+          git push origin "refs/remotes/origin/*:refs/heads/*"
           
       - name: Create Pull Request
         if: ${{ inputs.push-changes }}
