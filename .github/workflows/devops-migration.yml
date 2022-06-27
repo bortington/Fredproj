@@ -1,4 +1,4 @@
-name: Migration from Azure DevOps
+name: 'TASK: Migrate from Azure DevOps'
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ on:
         description: Name of the GitHub repo, e.g. VehiclesApi
         required: true
       push-branches:
-        description: Migrate all branches.
+        description: Migrate all branches. When false only the default branch is migrated.
         required: true
         type: boolean
       push-changes:
@@ -47,7 +47,7 @@ jobs:
         working-directory: target
         shell: bash
         run: |
-          migrationExists=$(git ls-remote --heads origin migration)
+          migrationExists=$(git ls-remote --heads origin $MIGRATION_BRANCH)
           
           if [[ -z "$migrationExists" ]]; then
               echo 'Migration branch does not exist. Continuing'
@@ -119,7 +119,7 @@ jobs:
         working-directory: target
         if: ${{ inputs.push-changes }}
         run: |
-          git push --follow-tags --set-upstream origin migration
+          git push --follow-tags --set-upstream origin $MIGRATION_BRANCH
           git push --all origin
           
       - name: Create Pull Request
