@@ -41,7 +41,7 @@ jobs:
           repository: ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
           fetch-depth: 0
           path: target
-          token: ${{ secrets.MIGRATION_GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUBMIGRATION_GITHUB_TOKEN }}
           
       - name: Check branch does not exist
         working-directory: target
@@ -126,7 +126,7 @@ jobs:
         if: ${{ inputs.push-changes }}
         working-directory: target
         env:
-          GITHUB_TOKEN: ${{ secrets.MIGRATION_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUBMIGRATION_GITHUB_TOKEN }}
         run: |
           gh pr create \
             --title "DevOps Migration from ${{inputs.azure-project}}/${{inputs.azure-repo}}" \
