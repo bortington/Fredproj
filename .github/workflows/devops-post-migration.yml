@@ -19,102 +19,105 @@ env:
   DEVOPS_ORG: bertington
   
 jobs:
-  - name: Generate Migration Script
-    shell: pwsh
-    run: |
-      function New-DevOpsPipelineMigrationScript 
-      {
-          [CmdletBinding()]
-          param (
-              [Parameter(Mandatory)]
-              [string]$File,
+  create-migration-script:
+    runs-on: windows-latest
+    steps:
+    - name: Generate Migration Script
+      shell: pwsh
+      run: |
+        function New-DevOpsPipelineMigrationScript 
+        {
+            [CmdletBinding()]
+            param (
+                [Parameter(Mandatory)]
+                [string]$File,
 
-              [Parameter(Mandatory)]
-              [string]$AzureOrganization,
+                [Parameter(Mandatory)]
+                [string]$AzureOrganization,
 
-              [Parameter(Mandatory)]
-              [string]$AzureProject,
+                [Parameter(Mandatory)]
+                [string]$AzureProject,
 
-              [Parameter(Mandatory)]
-              [string]$AzureRepository,
+                [Parameter(Mandatory)]
+                [string]$AzureRepository,
 
-              [Parameter(Mandatory)]
-              [string]$GitHubOrganization,
+                [Parameter(Mandatory)]
+                [string]$GitHubOrganization,
 
-              [Parameter(Mandatory)]
-              [string]$GitHubRepository
-          )
+                [Parameter(Mandatory)]
+                [string]$GitHubRepository
+            )
 
-          # Ensure required env vars have been set
+            # Ensure required env vars have been set
 
-          $AzureOrgUrl = "https://dev.azure.com/$AzureOrganization"
+            $AzureOrgUrl = "https://dev.azure.com/$AzureOrganization"
 
-          # Get the service connection ID
-          [string] $serviceEndpointJson = az devops service-endpoint list --org $AzureOrgUrl --project $AzureProject --query "[?contains(@.url, 'github')]"
+            # Get the service connection ID
+            [string] $serviceEndpointJson = az devops service-endpoint list --org $AzureOrgUrl --project $AzureProject --query "[?contains(@.url, 'github')]"
 
-          $serviceEndpoints = ConvertFrom-Json $serviceEndpointJson
-          $serviceEndpoint = $serviceEndpoints | Select-Object -First 1
-          $serviceConnectionId = $null
+            $serviceEndpoints = ConvertFrom-Json $serviceEndpointJson
+            $serviceEndpoint = $serviceEndpoints | Select-Object -First 1
+            $serviceConnectionId = $null
 
-          if($null -eq $serviceEndpoint)
-          {
-              # Throw if theres no GitHub service connection named RACWA
-              throw "Could not find any suitable GitHub service connection in project $AzureProject within $AzureOrgUrl. Please ask an admin to add a GitHub service connection to your Azure Project. Ideally with the name `"racwa`"."
-          }
-          else 
-          {
-              $serviceConnectionId = $serviceEndpoint.id
-              Write-Host "Using service endpoint: $($serviceEndpoint.name) with id $serviceConnectionId"
-          }
+            if($null -eq $serviceEndpoint)
+            {
+                # Throw if theres no GitHub service connection named RACWA
+                throw "Could not find any suitable GitHub service connection in project $AzureProject within $AzureOrgUrl. Please ask an admin to add a GitHub service connection to your Azure Project. Ideally with the name `"racwa`"."
+            }
+            else 
+            {
+                $serviceConnectionId = $serviceEndpoint.id
+                Write-Host "Using service endpoint: $($serviceEndpoint.name) with id $serviceConnectionId"
+            }
 
-          Add-Content -Path $File "# Auto generated Azure repo post-migration script for project $AzureProject within $AzureOrgUrl"
-          Add-Content -Path $File "# Migrating pipelines using service connection $($serviceEndpoint.name) ($serviceConnectionId)"
-          Add-Content -Path $File "#"
-          Add-Content -Path $File "# Please ensure the AzurePAT environment variable has been created with (TODO: Requirements)"
-          Add-Content -Path $File "# This also requires the ado2gh executable added to path which available here: https://github.com/github/gh-gei"
-          Add-Content -Path $File "#"
-          Add-Content -Path $File "# "
-          # Add check to ensure ado2gh exists
-          Add-Content -Path $File "# Instead of adding to PATH you can uncomment the following line with the correct path to the exe"
-          Add-Content -Path $File "# Set-Alias ado2gh `"C:\Software\ado2gh.exe`""
-          Add-Content -Path $File "# "
+            Add-Content -Path $File "# Auto generated Azure repo post-migration script for project $AzureProject within $AzureOrgUrl"
+            Add-Content -Path $File "# Migrating pipelines using service connection $($serviceEndpoint.name) ($serviceConnectionId)"
+            Add-Content -Path $File "#"
+            Add-Content -Path $File "# Please ensure the AzurePAT environment variable has been created with (TODO: Requirements)"
+            Add-Content -Path $File "# This also requires the ado2gh executable added to path which available here: https://github.com/github/gh-gei"
+            Add-Content -Path $File "#"
+            Add-Content -Path $File "# "
+            # Add check to ensure ado2gh exists
+            Add-Content -Path $File "# Instead of adding to PATH you can uncomment the following line with the correct path to the exe"
+            Add-Content -Path $File "# Set-Alias ado2gh `"C:\Software\ado2gh.exe`""
+            Add-Content -Path $File "# "
 
-          Add-Content -Path $File "if ((Get-Command `"ado2gh`" -ErrorAction SilentlyContinue) -eq `$null)"
-          Add-Content -Path $File "{"
-          Add-Content -Path $File "    throw `"Unable to find ado2gh`""
-          Add-Content -Path $File "}"
-          Add-Content -Path $File ""
-          Add-Content -Path $File "if(Test-Path env:\AzurePAT)"
-          Add-Content -Path $File "{"
-          Add-Content -Path $File "    throw `"Please set to find ado2gh`""
-          Add-Content -Path $File "}"
+            Add-Content -Path $File "if ((Get-Command `"ado2gh`" -ErrorAction SilentlyContinue) -eq `$null)"
+            Add-Content -Path $File "{"
+            Add-Content -Path $File "    throw `"Unable to find ado2gh`""
+            Add-Content -Path $File "}"
+            Add-Content -Path $File ""
+            Add-Content -Path $File "if(Test-Path env:\AzurePAT)"
+            Add-Content -Path $File "{"
+            Add-Content -Path $File "    throw `"Please set to find ado2gh`""
+            Add-Content -Path $File "}"
 
-          $pipelines = az pipelines list --organization $AzureOrgUrl --project $AzureProject --repository $AzureRepository --query "[*].{name: name, id: id, path: path}" |  ConvertFrom-Json
-          Write-Host "Located $($pipelines.count) pipelines"
+            $pipelines = az pipelines list --organization $AzureOrgUrl --project $AzureProject --repository $AzureRepository --query "[*].{name: name, id: id, path: path}" |  ConvertFrom-Json
+            Write-Host "Located $($pipelines.count) pipelines"
 
-          foreach ($pipeline in $pipelines) {
+            foreach ($pipeline in $pipelines) {
 
-              $pipelineUrl = "$AzureOrgUrl/$AzureProject/_build?definitionId=$($pipeline.id)"
+                $pipelineUrl = "$AzureOrgUrl/$AzureProject/_build?definitionId=$($pipeline.id)"
 
-              $pipeline.path = $pipeline.path.TrimStart("\")
-              $pipeline | Add-Member -MemberType NoteProperty -Name 'fullPath' -Value $($pipeline.path +"\" + $pipeline.name)
+                $pipeline.path = $pipeline.path.TrimStart("\")
+                $pipeline | Add-Member -MemberType NoteProperty -Name 'fullPath' -Value $($pipeline.path +"\" + $pipeline.name)
 
-              Write-Host "Pipeline URL: $pipelineUrl"
-              Write-Host "Pipeline Full Path: $($pipeline.fullPath)"
+                Write-Host "Pipeline URL: $pipelineUrl"
+                Write-Host "Pipeline Full Path: $($pipeline.fullPath)"
 
-              $migrateCommand = "ado2gh rewire-pipeline --ado-org `"$AzureOrganization`" --ado-team-project `"$AzureProject`" --ado-pipeline `"$($pipeline.fullPath)`" --github-org `"$GitHubOrganization`" --github-repo `"$GitHubRepository`" --service-connection-id `"$serviceConnectionId`" --ado-pat `$(`$env:AzurePAT) --verbose"
+                $migrateCommand = "ado2gh rewire-pipeline --ado-org `"$AzureOrganization`" --ado-team-project `"$AzureProject`" --ado-pipeline `"$($pipeline.fullPath)`" --github-org `"$GitHubOrganization`" --github-repo `"$GitHubRepository`" --service-connection-id `"$serviceConnectionId`" --ado-pat `$(`$env:AzurePAT) --verbose"
 
-              Add-Content -Path $File ""
-              Add-Content -Path $File "# === Pipeline $($pipeline.path). URL: $pipelineUrl"
-              Add-Content -Path $File $migrateCommand
-              Add-Content -Path $File ""
-          }
-      }
+                Add-Content -Path $File ""
+                Add-Content -Path $File "# === Pipeline $($pipeline.path). URL: $pipelineUrl"
+                Add-Content -Path $File $migrateCommand
+                Add-Content -Path $File ""
+            }
+        }
 
-      New-DevOpsPipelineMigrationScript -AzureOrganization bertington -AzureProject ${{inputs.azure-project}} -AzureRepository ${{inputs.azure-repo}} -File ${{inputs.azure-project}}-${{inputs.azure-repo}}-Migration.ps1 -GitHubOrganization bortington -GitHubRepository ${{inputs.github-repo}}
-      
-  - name: Artifact Migration Script code coverage results
-    uses: actions/upload-artifact@v3
-    with:
-      name: migration-script
-      path: '*.ps1'
+        New-DevOpsPipelineMigrationScript -AzureOrganization bertington -AzureProject ${{inputs.azure-project}} -AzureRepository ${{inputs.azure-repo}} -File ${{inputs.azure-project}}-${{inputs.azure-repo}}-Migration.ps1 -GitHubOrganization bortington -GitHubRepository ${{inputs.github-repo}}
+
+    - name: Artifact Migration Script code coverage results
+      uses: actions/upload-artifact@v3
+      with:
+        name: migration-script
+        path: '*.ps1'
