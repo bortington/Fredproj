@@ -22,6 +22,10 @@ jobs:
   create-migration-script:
     runs-on: windows-latest
     steps:
+    - uses: azure/login@v1
+      with:
+        creds: ${{ secrets.MIGRATION_AZURE_CREDENTIALS }}
+        
     - name: Generate Migration Script
       shell: pwsh
       run: |
@@ -116,8 +120,19 @@ jobs:
 
         New-DevOpsPipelineMigrationScript -AzureOrganization bertington -AzureProject ${{inputs.azure-project}} -AzureRepository ${{inputs.azure-repo}} -File ${{inputs.azure-project}}-${{inputs.azure-repo}}-Migration.ps1 -GitHubOrganization bortington -GitHubRepository ${{inputs.github-repo}}
 
+      # Not necessary but chucking in anyway
+    - name: Azure CLI script
+      uses: azure/CLI@v1
+      if: always()
+      with:
+        inlineScript: |
+          az logout
+          az cache purge
+          az account clear
+          
     - name: Artifact Migration Script code coverage results
       uses: actions/upload-artifact@v3
       with:
         name: migration-script
-        path: '*.ps1'
+        path: '*.ps1'   
+
