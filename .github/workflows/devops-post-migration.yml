@@ -31,8 +31,6 @@ jobs:
       run: |
         echo "${{secrets.GITHUBMIGRATION_AZUREDEVOPS_PAT}}" | az devops login --organization https://dev.azure.com/${{env.DEVOPS_ORG}}
         
-        az account show
-        
     - name: Generate Migration Script
       shell: pwsh
       run: |
@@ -127,19 +125,16 @@ jobs:
 
         New-DevOpsPipelineMigrationScript -AzureOrganization bertington -AzureProject ${{inputs.azure-project}} -AzureRepository ${{inputs.azure-repo}} -File ${{inputs.azure-project}}-${{inputs.azure-repo}}-Migration.ps1 -GitHubOrganization bortington -GitHubRepository ${{inputs.github-repo}}
 
-      # Not necessary but chucking in anyway
-    - name: Azure CLI script
-      uses: azure/CLI@v1
-      if: always()
-      with:
-        inlineScript: |
-          az logout
-          az cache purge
-          az account clear
-          
     - name: Artifact Migration Script code coverage results
       uses: actions/upload-artifact@v3
       with:
         name: migration-script
         path: '*.ps1'   
-
+        
+      # Not necessary but chucking in anyway
+    - name: Azure Logout
+      if: always()
+      run: |
+          az devops logout
+          az cache purge
+          az account clear
