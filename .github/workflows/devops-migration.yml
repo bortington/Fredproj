@@ -34,9 +34,8 @@ jobs:
       
           devopsRepo='https://${{env.DEVOPS_ORG}}@dev.azure.com/${{env.DEVOPS_ORG}}/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }}'
           
-          # base64 encodes using unicode character representation but we need ascii
-          authValue=`echo "pat:${{secrets.GITHUBMIGRATION_AZURE_DEVOPS_TOKEN}}" | iconv -f utf-8 -t ASCII | base64`
-          
+          authValue=`printf "pat:${{secrets.GITHUBMIGRATION_AZURE_DEVOPS_TOKEN}}" | iconv -f ASCII -t UTF-8 | base64`
+
           echo "blah: $authValue"
           #echo "::add-mask::$authValue"
           
