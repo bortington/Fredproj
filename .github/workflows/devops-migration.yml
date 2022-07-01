@@ -1,4 +1,11 @@
-name: 'TASK: Migrate from Azure DevOps'
+# Secrets:
+#   GITHUBMIGRATION_GITHUB_TOKEN
+#     GitHub PAT required to push commits to the repo and create a new PR
+#
+#   GITHUBMIGRATION_AZURE_DEVOPS_TOKEN
+#     The PAT used to clone the repo from devops. This needs Code(Read)
+
+name: 'RAC2GH_TASK: Migrate repo from Azure DevOps'
 
 on:
   workflow_dispatch:
@@ -14,6 +21,10 @@ on:
         required: true
       push-branches:
         description: Migrate all branches. When false only the default branch is migrated.
+        required: true
+        type: boolean
+      add-to-codacy:
+        description: Whether the GitHub repo is added to Codacy
         required: true
         type: boolean
       push-changes:
@@ -33,7 +44,6 @@ jobs:
       - run: |
       
           devopsRepo='https://${{env.DEVOPS_ORG}}@dev.azure.com/${{env.DEVOPS_ORG}}/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }}'
-          
           authValue=`printf "pat:${{secrets.GITHUBMIGRATION_AZURE_DEVOPS_TOKEN}}" | iconv -f ASCII -t UTF-8 | base64`
 
           echo "::add-mask::$authValue"
@@ -140,3 +150,34 @@ jobs:
             --body "Automated PR from Migration Workflow" \
             --draft \
             --repo ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
+            
+      - name: "Set Env Variables for Codacy"
+        shell: bash
+        if: ${{ inputs.add-to-codacy }}
+        run: |
+          echo "CODACY_ORGANIZATION_PROVIDER=$(if [[ $GITHUB_SERVER_URL == "https://github.com" ]]; then echo "gh"; else echo "ghe"; fi)" >> $GITHUB_ENV
+          echo "CODACY_USERNAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 1)" >> $GITHUB_ENV
+          echo "CODACY_PROJECT_NAME=${{inputs.github-repo}}" >> $GITHUB_ENV
+          
+      - name: Create Codacy Project if necessary
+        shell: pwsh
+        if: ${{ inputs.add-to-codacy }}
+        run: |
+              $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+              $headers.Add("api-token", "${{ secrets.CODACY_API_TOKEN }}")
+              $headers.Add("caller", "string")
+              $headers.Add("Content-Type", "application/json")
+              $body = @{
+                repositoryFullPath = $env:GITHUB_REPOSITORY
+                provider = $env:CODACY_ORGANIZATION_PROVIDER
+              } | ConvertTo-Json
+              Write-Host "Sending request with body: $body"
+              try {
+                $response = Invoke-RestMethod 'https://app.codacy.com/api/v3/repositories' -Method 'POST' -Headers $headers -Body $body -SkipHttpErrorCheck
+              } catch [System.Net.WebException] {
+                Write-Host "An exception was caught: $($_.Exception.Message)"
+              }
+              $statusCodeInt = [int]$response.BaseResponse.StatusCode
+              Write-Host Response: $statusCodeInt
+              Write-Host $response
+              $response | ConvertTo-Json
