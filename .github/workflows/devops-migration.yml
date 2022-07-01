@@ -1,3 +1,6 @@
+# This dispatched workflow merges an Azure repository into an existing GitHub repository and creates a PR.
+# See: https://rac-wa.atlassian.net/wiki/spaces/DEVX/pages/2816082081/Migrate+from+Azure+DevOps
+#
 # Secrets:
 #   GITHUBMIGRATION_GITHUB_TOKEN
 #     GitHub PAT required to push commits to the repo and create a new PR
