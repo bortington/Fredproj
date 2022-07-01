@@ -20,11 +20,11 @@ on:
         description: Name of the GitHub repo, e.g. VehiclesApi
         required: true
       push-branches:
-        description: Migrate all branches. When false only the default branch is migrated.
+        description: Migrate all branches? When false only the default branch is migrated.
         required: true
         type: boolean
       add-to-codacy:
-        description: Whether the GitHub repo is added to Codacy
+        description: Add the GitHub repo to Codacy?
         required: true
         type: boolean
       push-changes:
