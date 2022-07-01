@@ -31,8 +31,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
+          base64 --help
+      
           devopsRepo='https://${{env.DEVOPS_ORG}}@dev.azure.com/${{env.DEVOPS_ORG}}/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }}'
-          authValue=`echo "${{secrets.GITHUBMIGRATION_AZURE_DEVOPS_TOKEN}}" | base64 --encode`
+          authValue=`echo "${{secrets.GITHUBMIGRATION_AZURE_DEVOPS_TOKEN}}" | base64 -e`
           
           echo "blah: $authValue"
           #echo "::add-mask::$authValue"
