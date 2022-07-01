@@ -5,7 +5,7 @@
 #   GITHUBMIGRATION_AZURE_DEVOPS_TOKEN
 #     The PAT used to clone the repo from devops. This needs Code(Read)
 
-name: 'RAC2GH_TASK: Migrate repo from Azure DevOps'
+name: 'RAC2GH: Migrate repo from Azure DevOps'
 
 on:
   workflow_dispatch:
