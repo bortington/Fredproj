@@ -34,7 +34,7 @@ jobs:
           base64 --help
       
           devopsRepo='https://${{env.DEVOPS_ORG}}@dev.azure.com/${{env.DEVOPS_ORG}}/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }}'
-          authValue=`echo "${{secrets.GITHUBMIGRATION_AZURE_DEVOPS_TOKEN}}" | base64 -e`
+          authValue=`echo "${{secrets.GITHUBMIGRATION_AZURE_DEVOPS_TOKEN}}" | base64`
           
           echo "blah: $authValue"
           #echo "::add-mask::$authValue"
