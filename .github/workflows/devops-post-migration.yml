@@ -27,7 +27,6 @@ on:
         required: true
 
 env:
-  MIGRATION_BRANCH: migration
   GITHUB_ORG: bortington
   DEVOPS_ORG: bertington
   
@@ -131,7 +130,7 @@ jobs:
             }
         }
 
-        New-DevOpsPipelineMigrationScript -AzureOrganization bertington -AzureProject ${{inputs.azure-project}} -AzureRepository ${{inputs.azure-repo}} -File ${{inputs.azure-project}}-${{inputs.azure-repo}}-Migrate-Pipelines.ps1 -GitHubOrganization bortington -GitHubRepository ${{inputs.github-repo}}
+        New-DevOpsPipelineMigrationScript -AzureOrganization ${{env.DEVOPS_ORG}} -AzureProject ${{inputs.azure-project}} -AzureRepository ${{inputs.azure-repo}} -File ${{inputs.azure-project}}-${{inputs.azure-repo}}-Migrate-Pipelines.ps1 -GitHubOrganization ${{env.GITHUB_ORG}} -GitHubRepository ${{inputs.github-repo}}
 
     - name: Artifact Migration Script code coverage results
       uses: actions/upload-artifact@v3
