@@ -171,7 +171,7 @@ jobs:
               $headers.Add("caller", "string")
               $headers.Add("Content-Type", "application/json")
               $body = @{
-                repositoryFullPath = $env:GITHUB_REPOSITORY
+                repositoryFullPath = $env:CODACY_USERNAME/$env:CODACY_PROJECT_NAME
                 provider = $env:CODACY_ORGANIZATION_PROVIDER
               } | ConvertTo-Json
               Write-Host "Sending request with body: $body"
