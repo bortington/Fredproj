@@ -1,4 +1,17 @@
-name: 'TASK: Create Post Migration Azure DevOps'
+# Generates a powershell script artifact that will rewire pipelines using
+# the ado2gh tool.
+# Executing this workflow does nothing other than produce an artfiact. Users
+# should download the artifact, install ado2gh, create the required PAT and
+# then finally execute the script themselves after checking the contents.
+#
+# See: https://rac-wa.atlassian.net/wiki/spaces/DEVX/pages/2816082081/Migrate+from+Azure+DevOps
+#
+# Secrets:
+#   GITHUBMIGRATION_AZURE_DEVOPS_PIPELINE_MIGRATION_TOKEN
+#     PAT used to fetch pipeline names and service connetions.
+#     This requires the following scopes: Build (Read); Code (Read); Release (Read); Service Connections (Read & query)
+
+name: 'RAC2GH: Generate Azure Pipeline Migration Script'
 
 on:
   workflow_dispatch:
@@ -22,14 +35,10 @@ jobs:
   create-migration-script:
     runs-on: windows-latest
     steps:
-#     - uses: azure/login@v1
-#       with:
-#         creds: ${{ secrets.MIGRATION_AZURE_CREDENTIALS }}
-        
     - name: Azure DevOps Login
       shell: pwsh
       run: |
-        echo "${{secrets.GITHUBMIGRATION_AZUREDEVOPS_PAT}}" | az devops login --organization https://dev.azure.com/${{env.DEVOPS_ORG}}
+        echo "${{secrets.GITHUBMIGRATION_AZURE_DEVOPS_PIPELINE_MIGRATION_TOKEN}}" | az devops login --organization https://dev.azure.com/${{env.DEVOPS_ORG}}
         
     - name: Generate Migration Script
       shell: pwsh
@@ -86,7 +95,6 @@ jobs:
             Add-Content -Path $File "# This also requires the ado2gh executable added to path which available here: https://github.com/github/gh-gei"
             Add-Content -Path $File "#"
             Add-Content -Path $File "# "
-            # Add check to ensure ado2gh exists
             Add-Content -Path $File "# Instead of adding to PATH you can uncomment the following line with the correct path to the exe"
             Add-Content -Path $File "# Set-Alias ado2gh `"C:\Software\ado2gh.exe`""
             Add-Content -Path $File "# "
@@ -98,7 +106,7 @@ jobs:
             Add-Content -Path $File ""
             Add-Content -Path $File "if(Test-Path env:\AzurePAT)"
             Add-Content -Path $File "{"
-            Add-Content -Path $File "    throw `"Please set to find ado2gh`""
+            Add-Content -Path $File "    throw `"Please ensure the AzurePAT env var has been set`""
             Add-Content -Path $File "}"
 
             $pipelines = az pipelines list --organization $AzureOrgUrl --project $AzureProject --repository $AzureRepository --query "[*].{name: name, id: id, path: path}" |  ConvertFrom-Json
@@ -123,12 +131,12 @@ jobs:
             }
         }
 
-        New-DevOpsPipelineMigrationScript -AzureOrganization bertington -AzureProject ${{inputs.azure-project}} -AzureRepository ${{inputs.azure-repo}} -File ${{inputs.azure-project}}-${{inputs.azure-repo}}-Migration.ps1 -GitHubOrganization bortington -GitHubRepository ${{inputs.github-repo}}
+        New-DevOpsPipelineMigrationScript -AzureOrganization bertington -AzureProject ${{inputs.azure-project}} -AzureRepository ${{inputs.azure-repo}} -File ${{inputs.azure-project}}-${{inputs.azure-repo}}-Migrate-Pipelines.ps1 -GitHubOrganization bortington -GitHubRepository ${{inputs.github-repo}}
 
     - name: Artifact Migration Script code coverage results
       uses: actions/upload-artifact@v3
       with:
-        name: migration-script
+        name: migration-scripts
         path: '*.ps1'   
         
       # Not necessary but chucking in anyway
