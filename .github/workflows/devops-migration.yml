@@ -143,7 +143,7 @@ jobs:
           git push --all origin
           
       - name: Create Pull Request
-        if: ${{ inputs.add-to-codacy && inputs.add-to-codacy }}
+        if: ${{ inputs.push-changes }}
         working-directory: target
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUBMIGRATION_GITHUB_TOKEN }}
@@ -164,7 +164,7 @@ jobs:
           
       - name: Create Codacy Project if necessary
         shell: pwsh
-        if: ${{ inputs.add-to-codacy }}
+        if: ${{ inputs.add-to-codacy && inputs.add-to-codacy }}
         run: |
               $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
               $headers.Add("api-token", "${{ secrets.CODACY_API_TOKEN }}")
