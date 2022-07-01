@@ -32,9 +32,14 @@ jobs:
     steps:
       - run: |
           devopsRepo='https://${{env.DEVOPS_ORG}}@dev.azure.com/${{env.DEVOPS_ORG}}/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }}'
+          authValue=`echo "${{secrets.GITHUBMIGRATION_AZURE_DEVOPS_TOKEN}}" | base64 --encode`
+          
+          echo "blah: $authValue"
+          #echo "::add-mask::$authValue"
           
           echo "DevOps Repo: $devopsRepo"
           echo "SOURCE_GIT_URL=$devopsRepo" >> $GITHUB_ENV
+          echo "SOURCE_AUTH_B64PAT=$devopsRepo" >> $GITHUB_ENV
           
       - uses: actions/checkout@v3
         with:
@@ -60,7 +65,7 @@ jobs:
         run: |
       
           echo "Cloning repo..."
-          git clone -c http.extraHeader="AUTHORIZATION: Basic ${{secrets.GITHUBMIGRATION_AZURE_DEVOPS_TOKEN_BASE64}}" --mirror https://${{env.DEVOPS_ORG}}@dev.azure.com/${{env.DEVOPS_ORG}}/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }} source
+          git clone -c http.extraHeader="AUTHORIZATION: Basic ${{env.SOURCE_AUTH_B64PAT}}" --mirror https://${{env.DEVOPS_ORG}}@dev.azure.com/${{env.DEVOPS_ORG}}/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }} source
          
           cd source
 
