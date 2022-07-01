@@ -143,7 +143,7 @@ jobs:
           git push --all origin
           
       - name: Create Pull Request
-        if: ${{ inputs.push-changes }}
+        if: ${{ inputs.add-to-codacy && inputs.add-to-codacy }}
         working-directory: target
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUBMIGRATION_GITHUB_TOKEN }}
@@ -156,7 +156,7 @@ jobs:
             
       - name: "Set Env Variables for Codacy"
         shell: bash
-        if: ${{ inputs.add-to-codacy }}
+        if: ${{ inputs.add-to-codacy && inputs.add-to-codacy }}
         run: |
           echo "CODACY_ORGANIZATION_PROVIDER=$(if [[ $GITHUB_SERVER_URL == "https://github.com" ]]; then echo "gh"; else echo "ghe"; fi)" >> $GITHUB_ENV
           echo "CODACY_USERNAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 1)" >> $GITHUB_ENV
