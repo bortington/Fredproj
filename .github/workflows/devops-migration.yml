@@ -41,7 +41,7 @@ jobs:
           
           echo "DevOps Repo: $devopsRepo"
           echo "SOURCE_GIT_URL=$devopsRepo" >> $GITHUB_ENV
-          echo "SOURCE_AUTH_B64PAT=$devopsRepo" >> $GITHUB_ENV
+          echo "SOURCE_AUTH_B64PAT=$authValue" >> $GITHUB_ENV
           
       - uses: actions/checkout@v3
         with:
