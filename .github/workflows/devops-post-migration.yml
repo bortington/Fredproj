@@ -20,7 +20,9 @@ on:
         description: Azure project name. e.g. enter MRP for dev.azure.com/racwa/MRP/_git/VehiclesApi
         required: true
       azure-repo:
-        description: Name of the repo in DevOps, e.g. enter VehiclesApi for dev.azure.com/racwa/MRP/_git/VehiclesApi
+        description: |
+          Name of the repo in DevOps, e.g. enter VehiclesApi for dev.azure.com/racwa/MRP/_git/VehiclesApi. 
+          Leave blank to generate migration scripts for all repositories in the project.
         required: true
       github-repo:
         description: Name of the GitHub repo, e.g. VehiclesApi
@@ -130,7 +132,26 @@ jobs:
             }
         }
 
-        New-DevOpsPipelineMigrationScript -AzureOrganization ${{env.DEVOPS_ORG}} -AzureProject ${{inputs.azure-project}} -AzureRepository ${{inputs.azure-repo}} -File ${{inputs.azure-project}}-${{inputs.azure-repo}}-Migrate-Pipelines.ps1 -GitHubOrganization ${{env.GITHUB_ORG}} -GitHubRepository ${{inputs.github-repo}}
+        $repoParameter = "${{inputs.azure-repo}}"
+
+        if( $repoParameter )
+        {
+            # Assign it as an array with 1 item
+            $repos = @($repoParameter)
+        }
+        else
+        {
+            [string] $reposList = az repos list --organization https://dev.azure.com/bertington --project FredProj --query "[*].name"
+            $repos = ConvertFrom-Json $reposList
+        }
+
+        foreach( $repo in $repos )
+        {
+            Write-Host "Creating migration script for $repo"
+            New-DevOpsPipelineMigrationScript -AzureOrganization ${{env.DEVOPS_ORG}} -AzureProject ${{inputs.azure-project}} -AzureRepository $repo -File ${{inputs.azure-project}}-${{inputs.azure-repo}}-Migrate-Pipelines.ps1 -GitHubOrganization ${{env.GITHUB_ORG}} -GitHubRepository ${{inputs.github-repo}}
+        }
+        
+        # New-DevOpsPipelineMigrationScript -AzureOrganization ${{env.DEVOPS_ORG}} -AzureProject ${{inputs.azure-project}} -AzureRepository ${{inputs.azure-repo}} -File ${{inputs.azure-project}}-${{inputs.azure-repo}}-Migrate-Pipelines.ps1 -GitHubOrganization ${{env.GITHUB_ORG}} -GitHubRepository ${{inputs.github-repo}}
 
     - name: Artifact Migration Script code coverage results
       uses: actions/upload-artifact@v3
