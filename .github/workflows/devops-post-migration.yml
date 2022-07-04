@@ -7,7 +7,7 @@
 # See: https://rac-wa.atlassian.net/wiki/spaces/DEVX/pages/2816082081/Migrate+from+Azure+DevOps
 #
 # Secrets:
-#   GITHUBMIGRATION_AZURE_DEVOPS_PIPELINE_MIGRATION_TOKEN
+#   RAC2GH_AZURE_DEVOPS_PIPELINE_MIGRATION_TOKEN
 #     PAT used to fetch pipeline names and service connetions.
 #     This requires the following scopes: Build (Read); Code (Read); Release (Read); Service Connections (Read & query)
 
@@ -37,7 +37,7 @@ jobs:
     - name: Azure DevOps Login
       shell: pwsh
       run: |
-        echo "${{secrets.GITHUBMIGRATION_AZURE_DEVOPS_PIPELINE_MIGRATION_TOKEN}}" | az devops login --organization https://dev.azure.com/${{env.DEVOPS_ORG}}
+        echo "${{secrets.RAC2GH_AZURE_DEVOPS_PIPELINE_MIGRATION_TOKEN}}" | az devops login --organization https://dev.azure.com/${{env.DEVOPS_ORG}}
         
     - name: Generate Migration Script
       shell: pwsh
