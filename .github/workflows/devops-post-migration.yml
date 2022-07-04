@@ -118,7 +118,7 @@ jobs:
             Add-Content -Path $File "#    Run the powershell script in your terminal/powershell instance!"
             Add-Content -Path $File ""
             Add-Content -Path $File ""
-            Add-Content -Path $File "if ((Get-Command `"ado2gh`" -ErrorAction SilentlyContinue) -eq `$null)"
+            Add-Content -Path $File "if (`$null -eq (Get-Command `"ado2gh`" -ErrorAction SilentlyContinue))"
             Add-Content -Path $File "{"
             Add-Content -Path $File "    throw `"Unable to find ado2gh`""
             Add-Content -Path $File "}"
