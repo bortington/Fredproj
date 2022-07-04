@@ -151,8 +151,8 @@ jobs:
 
         foreach( $migration in $migrations )
         {
-            Write-Host "Creating migration script for $repo"
-            New-DevOpsPipelineMigrationScript -AzureOrganization ${{env.DEVOPS_ORG}} -AzureProject ${{inputs.azure-project}} -AzureRepository $($migration.azRepo) -File ${{inputs.azure-project}}-${{inputs.azure-repo}}-Migrate-Pipelines.ps1 -GitHubOrganization ${{env.GITHUB_ORG}} -GitHubRepository $($migration.ghRepo)
+            Write-Host "Creating migration script for $migration"
+            New-DevOpsPipelineMigrationScript -AzureOrganization ${{env.DEVOPS_ORG}} -AzureProject ${{inputs.azure-project}} -AzureRepository $($migration.azRepo) -File ${{inputs.azure-project}}-$($migration.azRepo)-Migrate-Pipelines.ps1 -GitHubOrganization ${{env.GITHUB_ORG}} -GitHubRepository $($migration.ghRepo)
         }
         
         # New-DevOpsPipelineMigrationScript -AzureOrganization ${{env.DEVOPS_ORG}} -AzureProject ${{inputs.azure-project}} -AzureRepository ${{inputs.azure-repo}} -File ${{inputs.azure-project}}-${{inputs.azure-repo}}-Migrate-Pipelines.ps1 -GitHubOrganization ${{env.GITHUB_ORG}} -GitHubRepository ${{inputs.github-repo}}
