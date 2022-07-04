@@ -156,7 +156,7 @@ jobs:
         {
             $migrations = @( @{ azRepo = $repoParameter; ghRepo = "${{inputs.github-repo}}" } )
             
-            if (![string]::IsNullOrEmpty("${{inputs.github-repo}}"))
+            if ([string]::IsNullOrEmpty("${{inputs.github-repo}}"))
             {
               throw "You must specify the GitHub repo name"
             }
