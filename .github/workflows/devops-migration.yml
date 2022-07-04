@@ -2,10 +2,10 @@
 # See: https://rac-wa.atlassian.net/wiki/spaces/DEVX/pages/2816082081/Migrate+from+Azure+DevOps
 #
 # Secrets:
-#   GITHUBMIGRATION_GITHUB_TOKEN
+#   RAC2GH_GITHUB_TOKEN
 #     GitHub PAT required to push commits to the repo and create a new PR
 #
-#   GITHUBMIGRATION_AZURE_DEVOPS_TOKEN
+#   RAC2GH_AZURE_DEVOPS_TOKEN
 #     The PAT used to clone the repo from devops. This needs Code(Read)
 
 name: 'RAC2GH: Migrate repo from Azure DevOps'
@@ -47,7 +47,7 @@ jobs:
       - run: |
       
           devopsRepo='https://${{env.DEVOPS_ORG}}@dev.azure.com/${{env.DEVOPS_ORG}}/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }}'
-          authValue=`printf "pat:${{secrets.GITHUBMIGRATION_AZURE_DEVOPS_TOKEN}}" | iconv -f ASCII -t UTF-8 | base64`
+          authValue=`printf "pat:${{secrets.RAC2GH_AZURE_DEVOPS_TOKEN}}" | iconv -f ASCII -t UTF-8 | base64`
 
           echo "::add-mask::$authValue"
           echo "blah: $authValue"
@@ -61,7 +61,7 @@ jobs:
           repository: ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
           fetch-depth: 0
           path: target
-          token: ${{ secrets.GITHUBMIGRATION_GITHUB_TOKEN }}
+          token: ${{ secrets.RAC2GH_GITHUB_TOKEN }}
           
       - name: Check branch does not exist
         working-directory: target
@@ -146,7 +146,7 @@ jobs:
         if: ${{ inputs.push-changes }}
         working-directory: target
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUBMIGRATION_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RAC2GH_GITHUB_TOKEN }}
         run: |
           gh pr create \
             --title "DevOps Migration from ${{inputs.azure-project}}/${{inputs.azure-repo}}" \
