@@ -17,16 +17,16 @@ on:
   workflow_dispatch:
     inputs:
       azure-project:
-        description: Azure project name. e.g. enter MRP for dev.azure.com/racwa/MRP/_git/VehiclesApi
+        description: Azure DevOps project name, e.g. WebApplications
         required: true
       azure-repo:
         description: |
-          Name of the repo in DevOps, e.g. enter VehiclesApi for dev.azure.com/racwa/MRP/_git/VehiclesApi. 
-          Leave blank to generate migration scripts for all repositories in the project.
-        required: true
+          Azure DevOps repo name. e.g. FredApp
+          Leave blank to generate migration scripts for all repositories in the project. Azure repo name will be used for GitHub repo name.
+        required: false
       github-repo:
-        description: Name of the GitHub repo, e.g. VehiclesApi
-        required: true
+        description: Destination GitHub repo name, e.g. FredApp
+        required: false
 
 env:
   GITHUB_ORG: bortington
@@ -136,19 +136,23 @@ jobs:
 
         if( $repoParameter )
         {
-            # Assign it as an array with 1 item
-            $repos = @($repoParameter)
+            $migrations = @( @{ azRepo = $repoParameter; ghRepo = "${{inputs.github-repo}}" } )
+            
+            if (![string]::IsNullOrEmpty("${{inputs.github-repo}}"))
+            {
+              throw "You must specify the GitHub repo name"
+            }
         }
         else
         {
-            [string] $reposList = az repos list --organization https://dev.azure.com/bertington --project FredProj --query "[*].name"
-            $repos = ConvertFrom-Json $reposList
-        }
+            [string] $reposList = az repos list --organization https://dev.azure.com/${{env.DEVOPS_ORG}} --project FredProj --query "[*].{azRepo: name, ghRepo: name}"
+            $migrations = ConvertFrom-Json $reposList
+        }        
 
-        foreach( $repo in $repos )
+        foreach( $migration in $migrations )
         {
             Write-Host "Creating migration script for $repo"
-            New-DevOpsPipelineMigrationScript -AzureOrganization ${{env.DEVOPS_ORG}} -AzureProject ${{inputs.azure-project}} -AzureRepository $repo -File ${{inputs.azure-project}}-${{inputs.azure-repo}}-Migrate-Pipelines.ps1 -GitHubOrganization ${{env.GITHUB_ORG}} -GitHubRepository ${{inputs.github-repo}}
+            New-DevOpsPipelineMigrationScript -AzureOrganization ${{env.DEVOPS_ORG}} -AzureProject ${{inputs.azure-project}} -AzureRepository $($migration.azRepo) -File ${{inputs.azure-project}}-${{inputs.azure-repo}}-Migrate-Pipelines.ps1 -GitHubOrganization ${{env.GITHUB_ORG}} -GitHubRepository $($migration.ghRepo)
         }
         
         # New-DevOpsPipelineMigrationScript -AzureOrganization ${{env.DEVOPS_ORG}} -AzureProject ${{inputs.azure-project}} -AzureRepository ${{inputs.azure-repo}} -File ${{inputs.azure-project}}-${{inputs.azure-repo}}-Migrate-Pipelines.ps1 -GitHubOrganization ${{env.GITHUB_ORG}} -GitHubRepository ${{inputs.github-repo}}
