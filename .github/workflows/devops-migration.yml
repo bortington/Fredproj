@@ -40,6 +40,8 @@ env:
   GITHUB_ORG: bortington
   DEVOPS_ORG: bertington
   
+concurrency: staging_environment
+
 jobs:
   clone-and-merge: # This job is run manually
     runs-on: ubuntu-latest
