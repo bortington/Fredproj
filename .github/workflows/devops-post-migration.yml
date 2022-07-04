@@ -103,7 +103,7 @@ jobs:
             Add-Content -Path $File "#    You can make this exe available by adding the folder to your PATH env var, or  use the Set-Alias mentioned in step 5."
             Add-Content -Path $File "#"
             Add-Content -Path $File "# Step 3:"
-            Add-Content -Path $File "#    Generate the Azure personal access token with scopes: Build (Read & execute); Release (Read)".
+            Add-Content -Path $File "#    Generate the Azure personal access token with scopes: Build `(Read & execute`); Release `(Read`)".
             Add-Content -Path $File "#"
             Add-Content -Path $File "# Step 4:"
             Add-Content -Path $File "#    Open a new terminal/powershell instance. Assign the AzurePAT environment var, e.g. `$env:AzurePAT=<my_pat>"
