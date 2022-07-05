@@ -1,4 +1,4 @@
-name: 'TASK: Migrate Repo from BitBucket Cloud'
+name: 'RAC2GH: Migrate Repo from BitBucket Cloud'
 
 on:
   workflow_dispatch:
