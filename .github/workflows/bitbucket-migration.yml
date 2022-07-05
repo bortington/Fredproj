@@ -1,4 +1,4 @@
-# This dispatched workflow merges an Azure repository into an existing GitHub repository and creates a PR.
+# This dispatched workflow merges a Bitbucket repo into an existing GitHub repo and creates a PR.
 # See: https://rac-wa.atlassian.net/wiki/spaces/DEVX/pages/2829975618/Migrate+from+BitBucket
 #
 # Secrets:
