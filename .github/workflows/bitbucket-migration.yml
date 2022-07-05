@@ -7,11 +7,15 @@
 #
 #   RAC2GH_BITBUCKET_USERNAME
 #     The bitbucket username used to generate RAC2GH_BITBUCKET_PAT required to clone the source repo
+#     This can be viewed by viewing your BitBucket accounts Personal Settings. In the Account Settings tab
+#     there is a Bitbucket profile settings section with your username visible.
 #
 #   RAC2GH_BITBUCKET_PAT
-#     The bitbucket PAT required to clone the source repo
+#     The bitbucket PAT required to clone the source repo. This can be created in BitBucket by:
+#     (Click Account Icon) -> Personal Settings -> App passwords -> Create app password
+#     The app password only needs Repository (Read).
 
-name: 'RAC2GH: Migrate Repo from BitBucket Cloud'
+name: 'RAC2GH: Migrate repo from BitBucket'
 
 on:
   workflow_dispatch:
