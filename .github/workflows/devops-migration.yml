@@ -39,8 +39,9 @@ env:
   MIGRATION_BRANCH: migration
   GITHUB_ORG: bortington
   DEVOPS_ORG: bertington
-  
-concurrency: staging_environment
+
+# Limit concurrency to 1 per git repo
+concurrency: rac2gh_${{inputs.github-repo}}
 
 jobs:
   clone-and-merge: # This job is run manually
