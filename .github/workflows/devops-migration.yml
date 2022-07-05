@@ -52,7 +52,6 @@ jobs:
           authValue=`printf "pat:${{secrets.RAC2GH_AZURE_DEVOPS_TOKEN}}" | iconv -f ASCII -t UTF-8 | base64`
 
           echo "::add-mask::$authValue"
-          echo "blah: $authValue"
 
           echo "DevOps Repo: $devopsRepo"
           echo "SOURCE_GIT_URL=$devopsRepo" >> $GITHUB_ENV
