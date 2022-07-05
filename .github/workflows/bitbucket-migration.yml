@@ -1,5 +1,5 @@
 # This dispatched workflow merges an Azure repository into an existing GitHub repository and creates a PR.
-# See: https://rac-wa.atlassian.net/wiki/spaces/DEVX/pages/2816082081/Migrate+from+Azure+DevOps
+# See: https://rac-wa.atlassian.net/wiki/spaces/DEVX/pages/2829975618/Migrate+from+BitBucket
 #
 # Secrets:
 #   RAC2GH_GITHUB_TOKEN
