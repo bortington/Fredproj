@@ -9,7 +9,7 @@
 #     PAT used to fetch pipeline names and service connetions.
 #     This requires the following scopes: Build (Read); Code (Read); Release (Read); Service Connections (Read & query)
 
-name: 'RAC2GH: Generate Azure Pipeline Migration Script'
+name: 'RAC2GH: Generate Azure Pipeline Rewiring Script'
 
 on:
   workflow_dispatch:
@@ -275,7 +275,7 @@ jobs:
         
   deploy-migrations2:
     runs-on: windows-latest
-    environment: RAC2GH
+    environment: RAC2GH123
     needs: create-migration-script
     steps:
     - run: |
