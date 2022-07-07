@@ -108,6 +108,7 @@ jobs:
             Add-Content -Path $File "#"
             Add-Content -Path $File "# Step 7:"
             Add-Content -Path $File "#    Run the powershell script in your terminal/powershell instance!"
+            Add-Content -Path $File "#    Be sure to close the powershell process once you are finished."
             Add-Content -Path $File ""
             Add-Content -Path $File ""
             Add-Content -Path $File 'param ($AzurePAT, $ADO2GHPath)'
