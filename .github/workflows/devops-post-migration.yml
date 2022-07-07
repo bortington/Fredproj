@@ -263,3 +263,12 @@ jobs:
           az devops logout
           az cache purge
           az account clear
+          
+  deploy-migrations:
+    runs-on: windows-latest
+    environment: RAC2GH
+    needs: create-migration-script
+    steps:
+    - run: |
+        echo "Beep!"      
+      
