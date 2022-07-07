@@ -20,14 +20,14 @@ on:
       azure-repo:
         description: |
           Azure DevOps repo name. e.g. FredApp
-          Leave blank to generate migration scripts for all repositories in the project. Azure repo name will be used for GitHub repo name.
+          Leave blank to generate migration scripts for all repositories in the project. Azure repo name will be used for GitHub repo name
         required: false
       github-repo:
         description: Destination GitHub repo name, e.g. FredApp
         required: false
       service-connection:
         description: |
-          Optional service connection name if a specific one must be used required.
+          Optional service connection name if a specific one must be used
         required: false
 
 env:
