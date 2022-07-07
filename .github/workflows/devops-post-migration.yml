@@ -278,5 +278,13 @@ jobs:
     needs: create-migration-script
     steps:
     - run: |
-        echo "Boop!"      
+        echo "Boop!"     
+        
+  deploy-migrations3:
+    runs-on: windows-latest
+    environment: RAC2GH
+    needs: deploy-migrations2
+    steps:
+    - run: |
+        echo "Barp!"      
       
