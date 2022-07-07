@@ -103,22 +103,37 @@ jobs:
             Add-Content -Path $File "#    Set-Alias ado2gh `"C:\Software\ado2gh.exe`""
             Add-Content -Path $File "#"
             Add-Content -Path $File "# Step 6:"
+            Add-Content -Path $File "#    Change the execution polity to allow to run the downloaded powershell script."
+            Add-Content -Path $File "#    Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process"
+            Add-Content -Path $File "#"
+            Add-Content -Path $File "# Step 7:"
             Add-Content -Path $File "#    Run the powershell script in your terminal/powershell instance!"
             Add-Content -Path $File ""
             Add-Content -Path $File ""
-            Add-Content -Path $File "if (`$null -eq (Get-Command `"ado2gh`" -ErrorAction SilentlyContinue))"
-            Add-Content -Path $File "{"
-            Add-Content -Path $File "    throw `"Unable to find ado2gh`""
-            Add-Content -Path $File "}"
-            Add-Content -Path $File ""
-            Add-Content -Path $File "# Ensure the AzurePAT env var has been assigned"
-            Add-Content -Path $File "if(`$false -eq `$(Test-Path env:\AzurePAT))"
-            Add-Content -Path $File "{"
-            Add-Content -Path $File "    throw `"Please ensure the AzurePAT env var has been set`""
-            Add-Content -Path $File "}"
-            Add-Content -Path $File ""
-            Add-Content -Path $File ""
-
+            Add-Content -Path $File 'param ($AzurePAT, $ADO2GHPath)'
+            Add-Content -Path $File ''
+            Add-Content -Path $File 'if($ADO2GHPath)'
+            Add-Content -Path $File '{'
+            Add-Content -Path $File '    Set-Alias ado2gh $ADO2GHPath'
+            Add-Content -Path $File '}'
+            Add-Content -Path $File ''
+            Add-Content -Path $File 'if($null -eq $AzurePAT)'
+            Add-Content -Path $File '{'
+            Add-Content -Path $File '    # Ensure the AzurePAT env var has been assigned if not provided as a parameter'
+            Add-Content -Path $File '    if($false -eq $(Test-Path env:\AzurePAT))'
+            Add-Content -Path $File '    {'
+            Add-Content -Path $File '        throw "Please ensure the AzurePAT env var has been set"'
+            Add-Content -Path $File '    }'
+            Add-Content -Path $File '    '
+            Add-Content -Path $File '    $AzurePAT = $env:AzurePAT'
+            Add-Content -Path $File '}'
+            Add-Content -Path $File ''
+            Add-Content -Path $File 'if ($null -eq (Get-Command "ado2gh" -ErrorAction SilentlyContinue))'
+            Add-Content -Path $File '{'
+            Add-Content -Path $File '    throw "Unable to find ado2gh"'
+            Add-Content -Path $File '}'
+            Add-Content -Path $File ''
+            
             # Get the GitHub service connections
             # We will default to the first one found., but to make it easier for cases where
             # multiple GitHub service connections exists we'll print them as a comment so
