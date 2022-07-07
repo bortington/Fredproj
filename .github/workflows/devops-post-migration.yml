@@ -188,7 +188,9 @@ jobs:
               Write-Host "Pipeline URL: $pipelineUrl"
               Write-Host "Pipeline Full Path: $($pipeline.fullPath)"
 
-              $migrateCommand = "ado2gh rewire-pipeline --ado-org `"$AzureOrganization`" --ado-team-project `"$AzureProject`" --ado-pipeline `"$($pipeline.fullPath)`" --github-org `"$GitHubOrganization`" --github-repo `"$GitHubRepository`" --service-connection-id `$serviceConnectionId` --ado-pat `$(`$env:AzurePAT) --verbose"
+              $migrateCommand = "ado2gh rewire-pipeline --ado-org `"$AzureOrganization`" --ado-team-project `"$AzureProject`" --ado-pipeline `"$($pipeline.fullPath)`" `
+                --github-org `"$GitHubOrganization`" --github-repo `"$GitHubRepository`" --service-connection-id `$serviceConnectionId` --ado-pat `$(`$env:AzurePAT) --verbose"
+                
               Add-Content -Path $File ""
               Add-Content -Path $File "# === Pipeline $($pipeline.fullPath). URL: $pipelineUrl"
               Add-Content -Path $File $migrateCommand
