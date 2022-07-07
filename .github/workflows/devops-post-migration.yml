@@ -157,26 +157,34 @@ jobs:
           Add-Content -Path $File "`$serviceConnectionId=""$serviceConnectionId"""
           Add-Content -Path $File ""
 
-          if($serviceEndpoints.Count -gt 1)
-          {
-              # If there are more than 1 GH service connection then we'll add the others
-              # in comment lines to make it easier to swap to a working one. This is useful if the 
-              # default one default fails or has an expired PAT
-              foreach($sc in $serviceEndpoints)
-              {
-                  if($sc.id -eq $serviceConnectionId)
-                  {
-                      continue
-                  }
+          Write-Out "## Service Connection" >> $GITHUB_STEP_SUMMARY
 
-                  Add-Content -Path $File "# Uncomment to use service connection: $($sc.name) with id $($sc.id)"
-                  Add-Content -Path $File "# `$serviceConnectionId=""$($sc.id)"""
-                  Add-Content -Path $File ""
+          # If there are more than 1 GH service connection then we'll add the others
+          # as commented out lines, so it be easy to swap without having to rerun the workflow.
+          # This is useful if the default one fails, or has an expired PAT
+          foreach($sc in $serviceEndpoints)
+          {
+              Write-Out "Discovered $($sc.type) service connection $($sc.name) with id $($sc.id)" >> $GITHUB_STEP_SUMMARY
+          
+              if($sc.id -eq $serviceConnectionId)
+              {
+                  Write-Out "Defaulting to this service connection" >> $GITHUB_STEP_SUMMARY
               }
+              else
+              {
+                Add-Content -Path $File "# Uncomment to use service connection: $($sc.name) with id $($sc.id)"
+                Add-Content -Path $File "# `$serviceConnectionId=""$($sc.id)"""
+                Add-Content -Path $File ""
+              }
+              
+              Write-Out "" >> $GITHUB_STEP_SUMMARY
           }
 
           $pipelines = az pipelines list --organization $AzureOrgUrl --project $AzureProject --repository $AzureRepository --query "[*].{name: name, id: id, path: path}" |  ConvertFrom-Json
           Write-Host "Located $($pipelines.count) pipelines"
+          Write-Out "## Pipelines" >> $GITHUB_STEP_SUMMARY
+          Write-Out "Discovered $($pipelines.Count) pipelines in $AzureProject/$AzureRepository" >> $GITHUB_STEP_SUMMARY
+          Write-Out "" >> $GITHUB_STEP_SUMMARY
 
           foreach ($pipeline in $pipelines) {
 
@@ -187,7 +195,13 @@ jobs:
 
               Write-Host "Pipeline URL: $pipelineUrl"
               Write-Host "Pipeline Full Path: $($pipeline.fullPath)"
-
+              
+              Write-Out "### Pipeline $($pipeline.fullPath)" >> $GITHUB_STEP_SUMMARY
+              Write-Out "Name: $($pipeline.name)" >> $GITHUB_STEP_SUMMARY
+              Write-Out "Path: $($pipeline.path)" >> $GITHUB_STEP_SUMMARY
+              Write-Out "URL: $pipelineUrl" >> $GITHUB_STEP_SUMMARY
+              Write-Out "" >> $GITHUB_STEP_SUMMARY
+              
               $migrateCommand = "ado2gh rewire-pipeline --ado-org `"$AzureOrganization`" --ado-team-project `"$AzureProject`" --ado-pipeline `"$($pipeline.fullPath)`" ```
                 --github-org `"$GitHubOrganization`" --github-repo `"$GitHubRepository`" --service-connection-id `$serviceConnectionId` --ado-pat `$(`$env:AzurePAT)"
                 
