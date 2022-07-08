@@ -265,27 +265,27 @@ jobs:
           az cache purge
           az account clear
           
-  deploy-migrations:
-    runs-on: windows-latest
-    environment: RAC2GH
-    needs: create-migration-script
-    steps:
-    - run: |
-        echo "Beep!"
+#   deploy-migrations:
+#     runs-on: windows-latest
+#     environment: RAC2GH
+#     needs: create-migration-script
+#     steps:
+#     - run: |
+#         echo "Beep!"
         
-  deploy-migrations2:
-    runs-on: windows-latest
-    environment: RAC2GH123
-    needs: create-migration-script
-    steps:
-    - run: |
-        echo "Boop!"     
+#   deploy-migrations2:
+#     runs-on: windows-latest
+#     environment: RAC2GH123
+#     needs: create-migration-script
+#     steps:
+#     - run: |
+#         echo "Boop!"     
         
-  deploy-migrations3:
-    runs-on: windows-latest
-    environment: RAC2GH
-    needs: deploy-migrations2
-    steps:
-    - run: |
-        echo "Barp!"      
+#   deploy-migrations3:
+#     runs-on: windows-latest
+#     environment: RAC2GH
+#     needs: deploy-migrations2
+#     steps:
+#     - run: |
+#         echo "Barp!"      
       
