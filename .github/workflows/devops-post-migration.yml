@@ -266,7 +266,7 @@ jobs:
         }
         else
         {
-          [string] $reposList = az repos list --organization https://dev.azure.com/${{env.DEVOPS_ORG}} --project ${{inputs.azure-project}} --query "[*].{azRepo: name, ghRepo: name}"
+          [string] $reposList = az repos list --organization https://dev.azure.com/${{env.DEVOPS_ORG}} --project "${{inputs.azure-project}}" --query "[*].{azRepo: name, ghRepo: name}"
           $migrations = ConvertFrom-Json $reposList
         }        
 
