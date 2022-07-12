@@ -20,7 +20,10 @@ on:
       azure-repo:
         description: |
           Azure DevOps repo name. e.g. FredApp
-          Leave blank to generate migration scripts for all repositories in the project. Azure repo name will be used for GitHub repo name
+        required: false
+      bitbucket-repo:
+        description: |
+          Bitbucket repo name. e.g. Enter bertproj for racwa/bertproj
         required: false
       github-repo:
         description: Destination GitHub repo name, e.g. FredApp
@@ -33,6 +36,7 @@ on:
 env:
   GITHUB_ORG: bortington
   DEVOPS_ORG: bertington
+  BITBUCKET_WORKSPACE: aleksstuff
   
 jobs:
   create-migration-script:
@@ -59,9 +63,14 @@ jobs:
                 [Parameter(Mandatory)]
                 [string]$AzureProject,
 
-                [Parameter(Mandatory)]
+                [Parameter()]
+                [AllowEmptyString()]
                 [string]$AzureRepository,
 
+                [Parameter()]
+                [AllowEmptyString()]
+                [string]$BitbucketRepository,
+                
                 [Parameter(Mandatory)]
                 [string]$GitHubOrganization,
 
@@ -74,92 +83,90 @@ jobs:
                 [string]$ServiceConnectionName
             )
 
-            # Ensure required env vars have been set
+          $AzureOrgUrl = "https://dev.azure.com/$AzureOrganization"
 
-            $AzureOrgUrl = "https://dev.azure.com/$AzureOrganization"
+          Add-Content -Path $File "# Auto generated Azure repo post-migration script for project $AzureProject within $AzureOrgUrl to GitHub project $GitHubOrganization/$GitHubRepository"
+          Add-Content -Path $File "#"
+          Add-Content -Path $File "# Please refer to the step by step documentation on confluence: https://rac-wa.atlassian.net/wiki/spaces/DEVX/pages/2829353121/Migrate+Azure+Pipelines"
+          Add-Content -Path $File "#"
+          Add-Content -Path $File "# Step 1:"
+          Add-Content -Path $File "#    Confirm the service connection $($serviceEndpoint.name) is correct."
+          Add-Content -Path $File "#    Confirm every ado2gh call in this file. Ensure all information is correct."
+          Add-Content -Path $File "#"
+          Add-Content -Path $File "# Step 2:"
+          Add-Content -Path $File "#   Download the ado2gh exe available on the gh-gei GitHub project: https://github.com/github/gh-gei"
+          Add-Content -Path $File "#    You can make this exe available by adding the folder to your PATH env var, or  use the Set-Alias mentioned in step 5."
+          Add-Content -Path $File "#"
+          Add-Content -Path $File "# Step 3:"
+          Add-Content -Path $File "#    Generate the Azure personal access token with scopes: Build (Read & execute); Release (Read)"
+          Add-Content -Path $File "#"
+          Add-Content -Path $File "# Step 4:"
+          Add-Content -Path $File "#    Open a new terminal/powershell instance. Assign the AzurePAT environment var, e.g. `$env:AzurePAT=<my_pat>"
+          Add-Content -Path $File "#"
+          Add-Content -Path $File "# Step 5:"
+          Add-Content -Path $File "#    Skip this if you added the ado2gh folder to your PATH env"
+          Add-Content -Path $File "#"
+          Add-Content -Path $File "#    Run the following command to associate ado2gh to the exe you downloaded."
+          Add-Content -Path $File "#    Set-Alias ado2gh `"C:\Software\ado2gh.exe`""
+          Add-Content -Path $File "#"
+          Add-Content -Path $File "# Step 6:"
+          Add-Content -Path $File "#    Change the execution polity to allow to run the downloaded powershell script."
+          Add-Content -Path $File "#    Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process"
+          Add-Content -Path $File "#"
+          Add-Content -Path $File "# Step 7:"
+          Add-Content -Path $File "#    Run the powershell script in your terminal/powershell instance!"
+          Add-Content -Path $File "#    Be sure to close the powershell process once you are finished."
+          Add-Content -Path $File ""
+          Add-Content -Path $File ""
+          Add-Content -Path $File 'param ($AzurePAT, $ADO2GHPath)'
+          Add-Content -Path $File ''
+          Add-Content -Path $File 'if($ADO2GHPath)'
+          Add-Content -Path $File '{'
+          Add-Content -Path $File '    Set-Alias ado2gh $ADO2GHPath'
+          Add-Content -Path $File '}'
+          Add-Content -Path $File ''
+          Add-Content -Path $File 'if($null -eq $AzurePAT)'
+          Add-Content -Path $File '{'
+          Add-Content -Path $File '    # Ensure the AzurePAT env var has been assigned if not provided as a parameter'
+          Add-Content -Path $File '    if($false -eq $(Test-Path env:\AzurePAT))'
+          Add-Content -Path $File '    {'
+          Add-Content -Path $File '        throw "Please ensure the AzurePAT env var has been set"'
+          Add-Content -Path $File '    }'
+          Add-Content -Path $File '    '
+          Add-Content -Path $File '    $AzurePAT = $env:AzurePAT'
+          Add-Content -Path $File '}'
+          Add-Content -Path $File ''
+          Add-Content -Path $File 'if ($null -eq (Get-Command "ado2gh" -ErrorAction SilentlyContinue))'
+          Add-Content -Path $File '{'
+          Add-Content -Path $File '    throw "Unable to find ado2gh"'
+          Add-Content -Path $File '}'
+          Add-Content -Path $File ''
 
-            Add-Content -Path $File "# Auto generated Azure repo post-migration script for project $AzureProject within $AzureOrgUrl to GitHub project $GitHubOrganization/$GitHubRepository"
-            Add-Content -Path $File "#"
-            Add-Content -Path $File "# Please refer to the step by step documentation on confluence: https://rac-wa.atlassian.net/wiki/spaces/DEVX/pages/2829353121/Migrate+Azure+Pipelines"
-            Add-Content -Path $File "#"
-            Add-Content -Path $File "# Step 1:"
-            Add-Content -Path $File "#    Confirm the service connection $($serviceEndpoint.name) is correct."
-            Add-Content -Path $File "#    Confirm every ado2gh call in this file. Ensure all information is correct."
-            Add-Content -Path $File "#"
-            Add-Content -Path $File "# Step 2:"
-            Add-Content -Path $File "#   Download the ado2gh exe available on the gh-gei GitHub project: https://github.com/github/gh-gei"
-            Add-Content -Path $File "#    You can make this exe available by adding the folder to your PATH env var, or  use the Set-Alias mentioned in step 5."
-            Add-Content -Path $File "#"
-            Add-Content -Path $File "# Step 3:"
-            Add-Content -Path $File "#    Generate the Azure personal access token with scopes: Build (Read & execute); Release (Read)"
-            Add-Content -Path $File "#"
-            Add-Content -Path $File "# Step 4:"
-            Add-Content -Path $File "#    Open a new terminal/powershell instance. Assign the AzurePAT environment var, e.g. `$env:AzurePAT=<my_pat>"
-            Add-Content -Path $File "#"
-            Add-Content -Path $File "# Step 5:"
-            Add-Content -Path $File "#    Skip this if you added the ado2gh folder to your PATH env"
-            Add-Content -Path $File "#"
-            Add-Content -Path $File "#    Run the following command to associate ado2gh to the exe you downloaded."
-            Add-Content -Path $File "#    Set-Alias ado2gh `"C:\Software\ado2gh.exe`""
-            Add-Content -Path $File "#"
-            Add-Content -Path $File "# Step 6:"
-            Add-Content -Path $File "#    Change the execution polity to allow to run the downloaded powershell script."
-            Add-Content -Path $File "#    Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process"
-            Add-Content -Path $File "#"
-            Add-Content -Path $File "# Step 7:"
-            Add-Content -Path $File "#    Run the powershell script in your terminal/powershell instance!"
-            Add-Content -Path $File "#    Be sure to close the powershell process once you are finished."
-            Add-Content -Path $File ""
-            Add-Content -Path $File ""
-            Add-Content -Path $File 'param ($AzurePAT, $ADO2GHPath)'
-            Add-Content -Path $File ''
-            Add-Content -Path $File 'if($ADO2GHPath)'
-            Add-Content -Path $File '{'
-            Add-Content -Path $File '    Set-Alias ado2gh $ADO2GHPath'
-            Add-Content -Path $File '}'
-            Add-Content -Path $File ''
-            Add-Content -Path $File 'if($null -eq $AzurePAT)'
-            Add-Content -Path $File '{'
-            Add-Content -Path $File '    # Ensure the AzurePAT env var has been assigned if not provided as a parameter'
-            Add-Content -Path $File '    if($false -eq $(Test-Path env:\AzurePAT))'
-            Add-Content -Path $File '    {'
-            Add-Content -Path $File '        throw "Please ensure the AzurePAT env var has been set"'
-            Add-Content -Path $File '    }'
-            Add-Content -Path $File '    '
-            Add-Content -Path $File '    $AzurePAT = $env:AzurePAT'
-            Add-Content -Path $File '}'
-            Add-Content -Path $File ''
-            Add-Content -Path $File 'if ($null -eq (Get-Command "ado2gh" -ErrorAction SilentlyContinue))'
-            Add-Content -Path $File '{'
-            Add-Content -Path $File '    throw "Unable to find ado2gh"'
-            Add-Content -Path $File '}'
-            Add-Content -Path $File ''
-            
-            # Get the GitHub service connections
-            # We will default to the first one found., but to make it easier for cases where
-            # multiple GitHub service connections exists we'll print them as a comment so
-            # the user can uncomment the desired one
+          # Get the GitHub service connections
+          # We will default to the first one found., but to make it easier for cases where
+          # multiple GitHub service connections exists we'll print them as a comment so
+          # the user can uncomment the desired one
 
-            [string] $serviceEndpointJson = az devops service-endpoint list --org $AzureOrgUrl --project $AzureProject --query "[?contains(@.url, 'github')]"
+          [string] $serviceEndpointJson = az devops service-endpoint list --org $AzureOrgUrl --project $AzureProject --query "[?contains(@.url, 'github')]"
 
-            $serviceEndpoints = ConvertFrom-Json $serviceEndpointJson
-            $serviceConnectionId = $null
-            $serviceEndpoint = $null
+          $serviceEndpoints = ConvertFrom-Json $serviceEndpointJson
+          $serviceConnectionId = $null
+          $serviceEndpoint = $null
 
-            if($ServiceConnectionName)
-            {
-                # If a specific service connection was named we'll use that
-                $serviceEndpoint = $serviceEndpoints | Where-Object { $_.name -eq $ServiceConnectionName } | Select-Object -First 1
+          if($ServiceConnectionName)
+          {
+              # If a specific service connection was named we'll use that
+              $serviceEndpoint = $serviceEndpoints | Where-Object { $_.name -eq $ServiceConnectionName } | Select-Object -First 1
 
-                Write-Host "Using specified GitHub service connection $($serviceEndpoint.name) with id $($serviceEndpoint.id)"
-            }
-            else
-            {
-                # Otherwise default to the first one
-                $serviceEndpoint = $serviceEndpoints | Select-Object -First 1
+              Write-Host "Using specified GitHub service connection $($serviceEndpoint.name) with id $($serviceEndpoint.id)"
+          }
+          else
+          {
+              # Otherwise default to the first one
+              $serviceEndpoint = $serviceEndpoints | Select-Object -First 1
 
-                Write-Host "Defaulting to GitHub service connection $($serviceEndpoint.name) with id $($serviceEndpoint.id)"
-            }
+              Write-Host "Defaulting to GitHub service connection $($serviceEndpoint.name) with id $($serviceEndpoint.id)"
+          }
 
           if($null -eq $serviceEndpoint)
           {
@@ -196,10 +203,29 @@ jobs:
               Write-Output "" >> $env:GITHUB_STEP_SUMMARY
           }
 
-          $pipelines = az pipelines list --organization $AzureOrgUrl --project $AzureProject --repository $AzureRepository --query "[*].{name: name, id: id, path: path}" |  ConvertFrom-Json
+          $pipelines=$null
+          $sourceRepoName=$null
+          
+          if($BitbucketRepository)
+          {
+            $sourceRepoName="$env:BITBUCKET_WORKSPACE/$BitbucketRepository"
+          
+            $pipelines = az pipelines list --organization $AzureOrgUrl --project $AzureProject --repository-type bitbucket --repository $sourceRepoName ` 
+              --query "[*].{name: name, id: id, path: path}" `
+              | ConvertFrom-Json
+          }
+          else if($AzureRepository)
+          {
+            $pipelines = az pipelines list --organization $AzureOrgUrl --project $AzureProject --repository $AzureRepository `
+              --query "[*].{name: name, id: id, path: path}" `
+              | ConvertFrom-Json
+              
+            $sourceRepoName="$AzureProject/$AzureRepository"
+          }
+          
           Write-Host "Located $($pipelines.count) pipelines"
           Write-Output "## Pipelines" >> $env:GITHUB_STEP_SUMMARY
-          Write-Output "Discovered $($pipelines.Count) pipelines in $AzureProject/$AzureRepository" >> $env:GITHUB_STEP_SUMMARY
+          Write-Output "Discovered $($pipelines.Count) pipelines in $sourceRepoName" >> $env:GITHUB_STEP_SUMMARY
           Write-Output "" >> $env:GITHUB_STEP_SUMMARY
 
           foreach ($pipeline in $pipelines) {
@@ -230,14 +256,13 @@ jobs:
 
         $repoParameter = "${{inputs.azure-repo}}"
 
-        if( $repoParameter )
+        if("${{inputs.azure-repo}}")
         {
-          $migrations = @( @{ azRepo = $repoParameter; ghRepo = "${{inputs.github-repo}}" } )
-
-          if ([string]::IsNullOrEmpty("${{inputs.github-repo}}"))
-          {
-            throw "You must specify the GitHub repo name"
-          }
+          $migrations = @( @{ azRepo = $repoParameter; ghRepo = "${{inputs.github-repo}}" } )          
+        }
+        else if("${{inputs.bitbucket-repo}}")
+        {
+          $migrations = @( @{ bbRepo = $repoParameter; ghRepo = "${{inputs.github-repo}}" } )          
         }
         else
         {
@@ -248,7 +273,7 @@ jobs:
         foreach( $migration in $migrations )
         {
           Write-Host "Creating migration script for $migration"
-          New-DevOpsPipelineMigrationScript -AzureOrganization ${{env.DEVOPS_ORG}} -AzureProject ${{inputs.azure-project}} -AzureRepository $($migration.azRepo) -File ${{inputs.azure-project}}-$($migration.azRepo)-Migrate-Pipelines.ps1 -GitHubOrganization ${{env.GITHUB_ORG}} -GitHubRepository $($migration.ghRepo) -ServiceConnectionName "${{inputs.service-connection}}"
+          New-DevOpsPipelineMigrationScript -AzureOrganization ${{env.DEVOPS_ORG}} -AzureProject ${{inputs.azure-project}} -AzureRepository "$($migration.azRepo)" -BitbucketRepository "$($migration.bbRepo)" -File ${{inputs.azure-project}}-$($migration.azRepo)-Migrate-Pipelines.ps1 -GitHubOrganization ${{env.GITHUB_ORG}} -GitHubRepository $($migration.ghRepo) -ServiceConnectionName "${{inputs.service-connection}}"
         }
         
     - name: Artifact Migration Script code coverage results
