@@ -210,14 +210,12 @@ jobs:
           {
             $sourceRepoName="$env:BITBUCKET_WORKSPACE/$BitbucketRepository"
           
-            $pipelines = az pipelines list --organization $AzureOrgUrl --project $AzureProject --repository-type bitbucket --repository $sourceRepoName ` 
-              --query "[*].{name: name, id: id, path: path}" `
+            $pipelines = az pipelines list --organization $AzureOrgUrl --project $AzureProject --repository-type bitbucket --repository $sourceRepoName --query "[*].{name: name, id: id, path: path}" `
               | ConvertFrom-Json
           }
           else if($AzureRepository)
           {
-            $pipelines = az pipelines list --organization $AzureOrgUrl --project $AzureProject --repository $AzureRepository `
-              --query "[*].{name: name, id: id, path: path}" `
+            $pipelines = az pipelines list --organization $AzureOrgUrl --project $AzureProject --repository $AzureRepository --query "[*].{name: name, id: id, path: path}" `
               | ConvertFrom-Json
               
             $sourceRepoName="$AzureProject/$AzureRepository"
