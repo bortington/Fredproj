@@ -252,11 +252,11 @@ jobs:
           }
         }
 
-        if("${{inputs.azure-repo}}")
+        if(-not [string]::IsNullOrWhiteSpace("${{inputs.azure-repo}}"))
         {
-          $migrations = @( @{ azRepo = ("${{inputs.azure-repo}}"; ghRepo = "${{inputs.github-repo}}" } )          
+          $migrations = @( @{ azRepo = "${{inputs.azure-repo}}"; ghRepo = "${{inputs.github-repo}}" } )          
         }
-        elseif("${{inputs.bitbucket-repo}}")
+        elseif(-not [string]::IsNullOrWhiteSpace("${{inputs.bitbucket-repo}}"))
         {
           $migrations = @( @{ bbRepo = "${{inputs.bitbucket-repo}}"; ghRepo = "${{inputs.github-repo}}" } )          
         }
@@ -265,6 +265,8 @@ jobs:
           [string] $reposList = az repos list --organization https://dev.azure.com/${{env.DEVOPS_ORG}} --project "${{inputs.azure-project}}" --query "[*].{azRepo: name, ghRepo: name}"
           $migrations = ConvertFrom-Json $reposList
         }
+
+        Write-Host $migrations
 
         foreach( $migration in $migrations )
         {
