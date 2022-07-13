@@ -252,21 +252,19 @@ jobs:
           }
         }
 
-        $repoParameter = "${{inputs.azure-repo}}"
-
         if("${{inputs.azure-repo}}")
         {
-          $migrations = @( @{ azRepo = $repoParameter; ghRepo = "${{inputs.github-repo}}" } )          
+          $migrations = @( @{ azRepo = ("${{inputs.azure-repo}}"; ghRepo = "${{inputs.github-repo}}" } )          
         }
         elseif("${{inputs.bitbucket-repo}}")
         {
-          $migrations = @( @{ bbRepo = $repoParameter; ghRepo = "${{inputs.github-repo}}" } )          
+          $migrations = @( @{ bbRepo = "${{inputs.bitbucket-repo}}"; ghRepo = "${{inputs.github-repo}}" } )          
         }
         else
         {
           [string] $reposList = az repos list --organization https://dev.azure.com/${{env.DEVOPS_ORG}} --project "${{inputs.azure-project}}" --query "[*].{azRepo: name, ghRepo: name}"
           $migrations = ConvertFrom-Json $reposList
-        }        
+        }
 
         foreach( $migration in $migrations )
         {
