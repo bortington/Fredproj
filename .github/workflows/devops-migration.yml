@@ -31,7 +31,7 @@ on:
         required: true
         type: boolean
       push-changes:
-        description: 'Whether we will push changes. When disabled this will perform a dry run'
+        description: 'Confirm.\n\nWhether we will push changes. When disabled this will perform a dry run'
         required: true
         type: boolean
 
