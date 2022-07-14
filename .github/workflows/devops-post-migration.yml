@@ -62,7 +62,7 @@ jobs:
           $migrations = @( @{ 
             azRepo = "${{inputs.azure-repo}}"
             ghRepo = "${{inputs.github-repo}}"
-            targetFile = "${{inputs.azure-project}}-${{inputs.azure-repo}}-Rewire-Pipelines.ps1"
+            fileName = "${{inputs.azure-project}}-${{inputs.azure-repo}}-Rewire-Pipelines.ps1"
           } )          
         }
         elseif(-not [string]::IsNullOrWhiteSpace("${{inputs.bitbucket-repo}}"))
@@ -70,7 +70,7 @@ jobs:
           $migrations = @( @{ 
             bbRepo = "${{inputs.bitbucket-repo}}"
             ghRepo = "${{inputs.github-repo}}"
-            targetFile = "${{inputs.azure-project}}-${{inputs.bitbucket-repo}}-Rewire-Pipelines.ps1"
+            fileName = "${{inputs.azure-project}}-${{inputs.bitbucket-repo}}-Rewire-Pipelines.ps1"
           } )          
         }
         else
