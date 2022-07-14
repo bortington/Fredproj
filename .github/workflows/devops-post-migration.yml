@@ -59,14 +59,23 @@ jobs:
 
         if(-not [string]::IsNullOrWhiteSpace("${{inputs.azure-repo}}"))
         {
-          $migrations = @( @{ azRepo = "${{inputs.azure-repo}}"; ghRepo = "${{inputs.github-repo}}" } )          
+          $migrations = @( @{ 
+            azRepo = "${{inputs.azure-repo}}"
+            ghRepo = "${{inputs.github-repo}}"
+            targetFile = "${{inputs.azure-project}}-${{inputs.azure-repo}}-Rewire-Pipelines.ps1"
+          } )          
         }
         elseif(-not [string]::IsNullOrWhiteSpace("${{inputs.bitbucket-repo}}"))
         {
-          $migrations = @( @{ bbRepo = "${{inputs.bitbucket-repo}}"; ghRepo = "${{inputs.github-repo}}" } )          
+          $migrations = @( @{ 
+            bbRepo = "${{inputs.bitbucket-repo}}"
+            ghRepo = "${{inputs.github-repo}}"
+            targetFile = "${{inputs.azure-project}}-${{inputs.bitbucket-repo}}-Rewire-Pipelines.ps1"
+          } )          
         }
         else
         {
+          # If neither bitbucket or az repo was specified then we generate scripts for all repos in the project
           [string] $reposList = az repos list --organization https://dev.azure.com/${{env.DEVOPS_ORG}} --project "${{inputs.azure-project}}" --query "[*].{azRepo: name, ghRepo: name}"
           $migrations = ConvertFrom-Json $reposList
         }
@@ -80,7 +89,7 @@ jobs:
           
           # Todo: Would be nice to retrieve default branch but for now we assume its main
           $callArgs = @{
-            TargetFile = "ScriptOutput\${{inputs.azure-project}}-$($migration.azRepo)-Migrate-Pipelines.ps1"
+            TargetFile = "ScriptOutput\"$($migration.fileName)"
             AzureOrganization = "${{env.DEVOPS_ORG}}"
             AzureProject = "${{inputs.azure-project}}"
             AzureRepo = "$($migration.azRepo)"
