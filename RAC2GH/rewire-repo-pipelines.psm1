@@ -51,7 +51,7 @@ function CreateRepoPipelineRewireScript
     )
 
     $AzureOrgUrl="https://dev.azure.com/$AzureOrganization"
- 
+
     if($BitbucketRepo) 
     {
         $sourceRepoLabel="$BitbucketWorkspace/$BitbucketRepository"
@@ -129,7 +129,7 @@ function CreateRepoPipelineRewireScript
 
     # Append the required function
     Add-Content $TargetFile "`n# ====================== Rewire Pipeline Function Start ======================n# Skip this section"
-    Get-Content .\rewire-pipeline-function.ps1 | Add-Content $TargetFile
+    Get-Content $PSScriptRoot\rewire-pipeline-function.ps1 | Add-Content $TargetFile
     Add-Content $TargetFile "`n`n# ====================== Rewire Pipelines ======================n`n# Please verify the arguments supplied are correct`n"
 
     $serviceConnectionId = $serviceEndpoint.id
