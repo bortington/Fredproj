@@ -81,15 +81,15 @@ jobs:
           # Todo: Would be nice to retrieve default branch but for now we assume its main
           $callArgs = @{
             TargetFile = "ScriptOutput\${{inputs.azure-project}}-$($migration.azRepo)-Migrate-Pipelines.ps1"
-            AzureOrganization = ${{env.DEVOPS_ORG}}
-            AzureProject = ${{inputs.azure-project}}
+            AzureOrganization = "${{env.DEVOPS_ORG}}"
+            AzureProject = "${{inputs.azure-project}}"
             AzureRepo = "$($migration.azRepo)"
-            BitbucketWorkspace = ${{env.BITBUCKET_WORKSPACE}}
+            BitbucketWorkspace = "${{env.BITBUCKET_WORKSPACE}}"
             BitbucketRepo = "$($migration.bbRepo)"
             ServiceConnectionName = "${{inputs.service-connection}}"
-            GitHubOrganization = ${{env.GITHUB_ORG}}
-            GitHubRepository = $($migration.ghRepo)
-            DefaultBranch = main
+            GitHubOrganization = "${{env.GITHUB_ORG}}"
+            GitHubRepository = "$($migration.ghRepo)"
+            DefaultBranch = "main"
           }
           
           CreateRepoPipelineRewireScript $callArgs
