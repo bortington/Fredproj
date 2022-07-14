@@ -186,3 +186,5 @@ function CreateRepoPipelineRewireScript
         Add-Content -Path $TargetFile $migrateCommand
     }
 }
+
+Export-ModuleMember -Function CreateRepoPipelineRewireScript
