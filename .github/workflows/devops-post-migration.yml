@@ -84,8 +84,8 @@ jobs:
             AzureOrganization = ${{env.DEVOPS_ORG}}
             AzureProject = ${{inputs.azure-project}}
             AzureRepo = "$($migration.azRepo)"
-            BitbucketWorkspace = ${{env.BITBUCKET_WORKSPACE
-            BitbucketRepo = "$($migration.bbRepo
+            BitbucketWorkspace = ${{env.BITBUCKET_WORKSPACE}}
+            BitbucketRepo = "$($migration.bbRepo)
             ServiceConnectionName = "${{inputs.service-connection}}"
             GitHubOrganization = ${{env.GITHUB_ORG}}
             GitHubRepository = $($migration.ghRepo)
