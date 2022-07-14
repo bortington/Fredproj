@@ -92,7 +92,7 @@ jobs:
             DefaultBranch = "main"
           }
           
-          CreateRepoPipelineRewireScript $callArgs
+          CreateRepoPipelineRewireScript @callArgs
         }
         
     - name: Artifact Migration Script code coverage results
