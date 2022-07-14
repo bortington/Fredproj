@@ -55,7 +55,7 @@ jobs:
     - name: Generate Migration Script
       shell: pwsh
       run: |
-        Import-Module -Name ".\scripts\RAC2GH\rewire-repo-pipelines.psm1"
+        Import-Module -Name ".\scripts\RAC2GH\rewire-repo-pipelines.psm1" -Force
 
         if(-not [string]::IsNullOrWhiteSpace("${{inputs.azure-repo}}"))
         {
@@ -72,7 +72,7 @@ jobs:
         }
 
         Write-Host $migrations
-        New-Item -Path .\ScriptOutput -ItemType Directory
+        New-Item -Path .\ScriptOutput -ItemType Directory -Force
         
         foreach( $migration in $migrations )
         {
