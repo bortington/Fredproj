@@ -61,7 +61,7 @@ function RewirePipeline
     $filePrefix = "$AzureOrganization-$AzureProject-$PipelineId-$(New-Guid)"
     
     $url = "https://dev.azure.com/$AzureOrganization/$AzureProject/_apis/build/definitions/$($PipelineId)?api-version=6.0";
-    $autHeader = "Authorization: Basic $([Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("pat:$($env:AzurePAT)")))"
+    $authHeader = "Authorization: Basic $([Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("pat:$($env:AzurePAT)")))"
 
     try
     {
@@ -69,7 +69,7 @@ function RewirePipeline
         ConvertTo-Json $newData | Out-File -FilePath "$filePrefix-newData.json"
 
         # Get the pipelines current state and store in file for later user with jq
-        curl -s --location --request GET $url --header $autHeader `
+        curl -s --location --request GET $url --header $authHeader `
             | jq `
             | Out-File -FilePath "$filePrefix-data.json"
         
@@ -87,7 +87,7 @@ function RewirePipeline
 
     if(-not $DryRun)
     {
-        curl -s --location --request PUT $url --header $autHeader
+        curl -s --location --request PUT $url --header $authHeader
     }
     else {
         Write-Output "Dry run mode enabled. No changes have been submitted"
