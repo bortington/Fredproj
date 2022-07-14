@@ -89,7 +89,7 @@ jobs:
           
           # Todo: Would be nice to retrieve default branch but for now we assume its main
           $callArgs = @{
-            TargetFile = "ScriptOutput\"$($migration.fileName)"
+            TargetFile = "ScriptOutput\$($migration.fileName)"
             AzureOrganization = "${{env.DEVOPS_ORG}}"
             AzureProject = "${{inputs.azure-project}}"
             AzureRepo = "$($migration.azRepo)"
