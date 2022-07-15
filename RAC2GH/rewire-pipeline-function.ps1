@@ -84,7 +84,7 @@ function RewirePipeline
         Remove-Item "$filePrefix-newData.json"
     }
 
-    Write-Output "New pipeline repository settings for $pipelineName`:"
+    Write-Output "New pipeline repository settings for $pipelineName` with path $pipelinePath"
     $data | jq  | ConvertFrom-Json | Write-Output
     $data | Out-File -FilePath "$filePrefix-newPipeline.json"
 
@@ -96,6 +96,5 @@ function RewirePipeline
         Write-Output "Dry run mode enabled. No changes have been submitted"
     }
 
-    Remove-Item "$filePrefix-newData.json"
-
+    Remove-Item "$filePrefix-newPipeline.json"
 }
