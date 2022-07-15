@@ -113,7 +113,7 @@ function CreateRepoPipelineRewireScript
 #    Open a new terminal/powershell instance. Assign the AzurePAT environment var, e.g. `$env:AzurePAT=<my_pat>
 #
 # Step 5:
-#    Change the execution polity to allow to run the downloaded powershell script.
+#    Change the execution policy to allow us to run the downloaded powershell script.
 #    Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
 #
 # Step 6:

@@ -1,6 +1,6 @@
-# Generates a powershell script artifact that will rewire pipelines using the ado2gh tool.
-# Executing this workflow does nothing other than produce an artifact. Users should download the artifact, ]
-# install ado2gh, create the required PA, then finally execute the script themselves after checking the contents.
+# Generates a powershell script artifact that will rewire pipelines to point a different repository.
+# Executing this workflow does nothing other than produce a .ps1 artifact. Users should download the artifact,
+# install jq, create the required PA, then finally execute the script themselves after checking the contents.
 #
 # See: https://rac-wa.atlassian.net/wiki/spaces/DEVX/pages/2816082081/Migrate+from+Azure+DevOps
 #
@@ -117,28 +117,3 @@ jobs:
           az devops logout
           az cache purge
           az account clear
-          
-#   deploy-migrations:
-#     runs-on: windows-latest
-#     environment: RAC2GH
-#     needs: create-migration-script
-#     steps:
-#     - run: |
-#         echo "Beep!"
-        
-#   deploy-migrations2:
-#     runs-on: windows-latest
-#     environment: RAC2GH123
-#     needs: create-migration-script
-#     steps:
-#     - run: |
-#         echo "Boop!"     
-        
-#   deploy-migrations3:
-#     runs-on: windows-latest
-#     environment: RAC2GH
-#     needs: deploy-migrations2
-#     steps:
-#     - run: |
-#         echo "Barp!"      
-      
