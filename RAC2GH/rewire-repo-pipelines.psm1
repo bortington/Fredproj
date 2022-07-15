@@ -60,12 +60,12 @@ function CreateRepoPipelineRewireScript
     }
     else
     {
-        $sourceRepoLabel="$AzureProject/$AzureRepository"
+        $sourceRepoLabel="$AzureProject/$AzureRepo"
         $pipelines = az pipelines list --org $AzureOrgUrl --project $AzureProject --repository $AzureRepo `
             | jq -c | ConvertFrom-Json
     }
 
-    Write-Host "Creating migration script for $sourceRepoLabel to GitHub $GitHubOrganization/$GitHubRepository"
+    Write-Output "Creating migration script for $sourceRepoLabel to GitHub $GitHubOrganization/$GitHubRepository"
 
     # Get all GitHub service connections
     $serviceEndpoints = az devops service-endpoint list --org $AzureOrgUrl --project $AzureProject --query "[?contains(@.url, 'github')]" | ConvertFrom-Json
@@ -76,7 +76,7 @@ function CreateRepoPipelineRewireScript
     {
         # If a specific service connection was named we'll use that
         $serviceEndpoint = $serviceEndpoints | Where-Object { $_.name -eq $ServiceConnectionName } | Select-Object -First 1
-        Write-Host "Using specified GitHub service connection $($serviceEndpoint.name) with id $($serviceEndpoint.id)"
+        Write-Output "Using specified GitHub service connection $($serviceEndpoint.name) with id $($serviceEndpoint.id)"
 
         if($null -eq $serviceEndpoint)
         {
@@ -87,7 +87,7 @@ function CreateRepoPipelineRewireScript
     {
         # Otherwise default to the first one
         $serviceEndpoint = $serviceEndpoints | Select-Object -First 1
-        Write-Host "Defaulting to GitHub service connection $($serviceEndpoint.name) with id $($serviceEndpoint.id)"
+        Write-Output "Defaulting to GitHub service connection $($serviceEndpoint.name) with id $($serviceEndpoint.id)"
     }
         
     if($null -eq $serviceEndpoint)
@@ -133,7 +133,7 @@ function CreateRepoPipelineRewireScript
     Add-Content $TargetFile "`n`n# ====================== Rewire Pipelines ======================n`n# Please verify the arguments supplied are correct`n"
 
     $serviceConnectionId = $serviceEndpoint.id
-    Write-Host "Using connection endpoint: $($serviceEndpoint.name) with id $serviceConnectionId"
+    Write-Output "Using connection endpoint: $($serviceEndpoint.name) with id $serviceConnectionId"
 
     Add-Content -Path $TargetFile "
 # Using service connection: $($serviceEndpoint.name) with id $serviceConnectionId
@@ -169,8 +169,8 @@ function CreateRepoPipelineRewireScript
         $pipelineUrl = "$AzureOrgUrl/$AzureProject/_build?definitionId=$($pipeline.id)"
         $pipeline.path = $pipeline.path.TrimStart("\")
         $pipeline | Add-Member -MemberType NoteProperty -Name 'fullPath' -Value $($pipeline.path +"\" + $pipeline.name)
-        Write-Host "Pipeline URL: $pipelineUrl"
-        Write-Host "Pipeline Full Path: $($pipeline.fullPath)"
+        Write-Output "Pipeline URL: $pipelineUrl"
+        Write-Output "Pipeline Full Path: $($pipeline.fullPath)"
         
         AppendSummary "### Pipeline $($pipeline.fullPath)"
         AppendSummary "Name: $($pipeline.name)"

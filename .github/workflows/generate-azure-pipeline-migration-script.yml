@@ -80,12 +80,12 @@ jobs:
           $migrations = ConvertFrom-Json $reposList
         }
 
-        Write-Host $migrations
+        Write-Output $migrations
         New-Item -Path .\ScriptOutput -ItemType Directory -Force
         
         foreach( $migration in $migrations )
         {
-          Write-Host "Creating migration script for $migration"
+          Write-Output "Creating migration script for $migration"
           
           # Todo: Would be nice to retrieve default branch but for now we assume its main
           $callArgs = @{
