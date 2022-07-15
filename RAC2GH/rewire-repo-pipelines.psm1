@@ -162,7 +162,7 @@ function CreateRepoPipelineRewireScript
     Write-Output "Located $($pipelines.count) pipelines"
     Write-Output "## Pipelines" >> $env:GITHUB_STEP_SUMMARY
     
-    AppendSummary "Discovered $($pipelines.Count) pipelines in $sourceRepoName`n"
+    AppendSummary "Discovered $($pipelines.Count) pipelines in $sourceRepoLabel`n"
 
     foreach ($pipeline in $pipelines) 
     {
