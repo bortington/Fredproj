@@ -60,7 +60,7 @@ function CreateRepoPipelineRewireScript
     }
     else
     {
-        $sourceRepoLabel="$AzureProject/$AzureRepository"
+        $sourceRepoLabel="$AzureProject/$AzureRepo"
         $pipelines = az pipelines list --org $AzureOrgUrl --project $AzureProject --repository $AzureRepo `
             | jq -c | ConvertFrom-Json
     }
