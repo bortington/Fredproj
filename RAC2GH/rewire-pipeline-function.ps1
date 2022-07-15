@@ -75,6 +75,8 @@ function RewirePipeline
         
         # Take original data, remove .repository, and add new data to the object. Then we add the original clean and checkoutSubmodules values
         $data = jq -c -n --argfile newData "$filePrefix-newData.json" --argfile data "$filePrefix-data.json" '$data | del(.repository) * $newData | .repository += {clean: $data.repository.clean, checkoutSubmodules: $data.repository.checkoutSubmodules}'
+        $pipelineName = $data | jq '.name'
+        $pipelinePath = $data | jq '.path'
     }
     finally
     {
@@ -82,14 +84,18 @@ function RewirePipeline
         Remove-Item "$filePrefix-newData.json"
     }
 
-    Write-Output "New pipeline repository settings:"
-    $data | jq '.repository' | ConvertFrom-Json | Write-Output
+    Write-Output "New pipeline repository settings for $pipelineName`:"
+    $data | jq  | ConvertFrom-Json | Write-Output
+    $data | Out-File -FilePath "$filePrefix-newPipeline.json"
 
     if(-not $DryRun)
     {
-        curl -s --location --request PUT $url --header $authHeader
+        curl $url --verbose --header 'Content-Type: application/json' --request PUT --header $authHeader --data "@$filePrefix-newPipeline.json"
     }
     else {
         Write-Output "Dry run mode enabled. No changes have been submitted"
     }
+
+    Remove-Item "$filePrefix-newData.json"
+
 }
