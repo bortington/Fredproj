@@ -178,7 +178,7 @@ function CreateRepoPipelineRewireScript
         AppendSummary "ID: $($pipeline.id)"
         AppendSummary "URL: $pipelineUrl`n"
         
-        $migrateCommand = "RewirePipeline -AzureOrganization $AzureOrganization -AzureProject $AzureProject -GitHubOrganization $GitHubOrganization -GitHubRepository $GitHubRepository -DefaultBranch $DefaultBranch -PipelineId $($pipeline.id) -ServiceConnectionId `$serviceConnectionId -DryRun"
+        $migrateCommand = "RewirePipeline -AzureOrganization $AzureOrganization -AzureProject $AzureProject -GitHubOrganization $GitHubOrganization -GitHubRepository $GitHubRepository -DefaultBranch $DefaultBranch -PipelineId $($pipeline.id) -ServiceConnectionId `$serviceConnectionId"
         
         Add-Content -Path $TargetFile "
 # === Pipeline $($pipeline.fullPath). URL: $pipelineUrl"
