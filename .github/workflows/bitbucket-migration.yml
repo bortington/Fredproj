@@ -84,8 +84,8 @@ jobs:
           git clone --mirror $gitUrl source
           
           cd source
-          set -x
-          git branch -rl
+          
+          git branch -rl | echo
           
           # sourceBranch=$(git branch -vv | grep -Po "^[\s\*]*\K[^\s]*(?=.*$(git branch -rl '*/HEAD' | grep -o '[^ ]\+$'))")
           sourceBranch=$(git rev-parse --abbrev-ref origin/HEAD | cut -c8-)
