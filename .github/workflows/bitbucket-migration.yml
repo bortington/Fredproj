@@ -7,21 +7,21 @@
 #
 #   RAC2GH_BITBUCKET_USERNAME
 #     The bitbucket username used to generate RAC2GH_BITBUCKET_PAT required to clone the source repo
-#     This can be viewed by viewing your BitBucket accounts Personal Settings. In the Account Settings tab
+#     This can be viewed by viewing your Bitbucket accounts Personal Settings. In the Account Settings tab
 #     there is a Bitbucket profile settings section with your username visible.
 #
 #   RAC2GH_BITBUCKET_PAT
-#     The bitbucket PAT required to clone the source repo. This can be created in BitBucket by:
+#     The bitbucket PAT required to clone the source repo. This can be created in Bitbucket by:
 #     (Click Account Icon) -> Personal Settings -> App passwords -> Create app password
 #     The app password only needs Repository (Read).
 
-name: 'RAC2GH: Migrate repo from BitBucket'
+name: 'RAC2GH: Migrate repo from Bitbucket'
 
 on:
   workflow_dispatch:
     inputs:
       bitbucket-repo:
-        description: Name of the BitBucket repo
+        description: Name of the Bitbucket repo
         required: true
       github-repo:
         description: Name of the GitHub repo
@@ -73,27 +73,20 @@ jobs:
           
       - shell: bash
         run: |
-          
-          echo $SHELL
-          
           appToken=${{secrets.RAC2GH_BITBUCKET_PAT}}
           bbUsername=${{secrets.RAC2GH_BITBUCKET_USERNAME}}
-          
           gitUrl=https://$bbUsername:$appToken@bitbucket.org/$BITBUCKET_WORKSPACE/${{inputs.bitbucket-repo}}.git
           
           echo "Cloning source repo from $gitUrl"
-          
           git clone --mirror $gitUrl source
           
           cd source
-          
           git --version
           git remote show origin
           sourceBranch=$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')
-          
           echo "Source repository main branch: $sourceBranch"
           
-          # Throw if branch default branch was most definitely incorrect
+          # Throw if default branch was most definitely incorrect
           if [ "$sourceBranch" == "master" ] || [ "$sourceBranch" == "main" ]; then
               echo "SOURCE_BRANCH=$sourceBranch" >> $GITHUB_ENV
               echo "Set SOURCE_BRANCH env var to $sourceBranch"
@@ -101,8 +94,6 @@ jobs:
               echo "::error::Failed to detect default branch from source repo. Got: $sourceBranch"
               exit 1
           fi
-          
-          #echo "SOURCE_BRANCH=$sourceBranch" >> $GITHUB_ENV
           
           git fetch --all --tags
           
@@ -164,7 +155,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RAC2GH_GITHUB_TOKEN }}
         run: |
           gh pr create \
-            --title "BitBucket Migration from ${{env.BITBUCKET_WORKSPACE}}/${{inputs.bitbucket-repo}}" \
+            --title "Bitbucket Migration from ${{env.BITBUCKET_WORKSPACE}}/${{inputs.bitbucket-repo}}" \
             --body "Automated PR from Migration Workflow" \
             --draft \
             --repo ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
