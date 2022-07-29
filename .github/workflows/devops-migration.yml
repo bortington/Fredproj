@@ -31,17 +31,17 @@ on:
         required: true
         type: boolean
       push-changes:
-        description: 'Confirm. (Leaving this unticked will perform a dry run)'
+        description: Confirm. (Leaving this unticked will perform a dry run)
         required: true
         type: boolean
+
+# Limit concurrency to 1 per git repo
+concurrency: rac2gh_${{inputs.github-repo}}
 
 env:
   MIGRATION_BRANCH: migration
   GITHUB_ORG: bortington
   DEVOPS_ORG: bertington
-
-# Limit concurrency to 1 per git repo
-concurrency: rac2gh_${{inputs.github-repo}}
 
 jobs:
   clone-and-merge: # This job is run manually
