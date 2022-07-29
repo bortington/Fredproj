@@ -87,24 +87,9 @@ jobs:
           
           cd source
           
-          fred=$(git branch -rl)
-          
-          echo "Fred:$fred"
-          
-          git branch -rl
-          
           git --version
-          
-          echo "Blep"
-          
-          git --version
-          
-          # sourceBranch=$(git branch -vv | grep -Po "^[\s\*]*\K[^\s]*(?=.*$(git branch -rl '*/HEAD' | grep -o '[^ ]\+$'))")
-          
-          echo "What the fuck"
-          sourceBranch=$(git rev-parse --abbrev-ref origin/HEAD | cut -c8-)
-          #sourceBranch=$(git branch -rl "*/HEAD" | cut -d/ -f1)
-          echo "Is happening"
+          git remote show origin
+          sourceBranch=$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')
           
           echo "Source repository main branch: $sourceBranch"
           
