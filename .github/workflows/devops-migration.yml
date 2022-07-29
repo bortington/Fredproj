@@ -85,11 +85,19 @@ jobs:
           git clone -c http.extraHeader="AUTHORIZATION: Basic ${{env.SOURCE_AUTH_B64PAT}}" --mirror https://${{env.DEVOPS_ORG}}@dev.azure.com/${{env.DEVOPS_ORG}}/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }} source
          
           cd source
-
+          git --version
+          git remote show origin
           sourceBranch=$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')
-          echo "Source repository main branch: '$sourceBranch'"
+          echo "Source repository main branch: $sourceBranch"
           
-          echo "SOURCE_BRANCH=$sourceBranch" >> $GITHUB_ENV
+          # Throw if default branch was most definitely incorrect
+          if [ "$sourceBranch" == "master" ] || [ "$sourceBranch" == "main" ]; then
+              echo "SOURCE_BRANCH=$sourceBranch" >> $GITHUB_ENV
+              echo "Set SOURCE_BRANCH env var to $sourceBranch"
+          else
+              echo "::error::Failed to detect default branch from source repo. Got: $sourceBranch"
+              exit 1
+          fi
           
           git fetch --all --tags
           
