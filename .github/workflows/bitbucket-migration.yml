@@ -94,7 +94,7 @@ jobs:
           echo "Source repository main branch: $sourceBranch"
           
           # Throw if branch default branch was most definitely incorrect
-          if [ $sourceBranch -eq "master" ] ||  [ $sourceBranch -eq "main ]; then
+          if [ $sourceBranch -eq "master" ] ||  [ $sourceBranch -eq "main" ]; then
               echo "SOURCE_BRANCH=$sourceBranch" >> $GITHUB_ENV
               echo "Set SOURCE_BRANCH env var to $sourceBranch"
           else
