@@ -27,11 +27,11 @@ on:
         required: true
         type: boolean
       add-to-codacy:
-        description: Add the GitHub repo to Codacy?
+        description: Add the GitHub repo to Codacy? (Note that Codacy gates could prevent the migration branch being merged)
         required: true
         type: boolean
       push-changes:
-        description: 'Confirm. When disabled this will perform a dry run'
+        description: 'Confirm. (Leaving this unticked will perform a dry run)'
         required: true
         type: boolean
 
