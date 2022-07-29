@@ -87,7 +87,17 @@ jobs:
           
           cd source
           
-          git branch -rl | echo
+          fred=$(git branch -rl)
+          
+          echo "Fred:$fred"
+          
+          git branch -rl
+          
+          git --version
+          
+          echo "Blep"
+          
+          git --version
           
           # sourceBranch=$(git branch -vv | grep -Po "^[\s\*]*\K[^\s]*(?=.*$(git branch -rl '*/HEAD' | grep -o '[^ ]\+$'))")
           
