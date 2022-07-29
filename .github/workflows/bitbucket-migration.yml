@@ -51,9 +51,6 @@ jobs:
   migrate-bitbucket-to-github:
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          echo "TARGET_GIT_URL=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" >> $GITHUB_ENV
-          
       - uses: actions/checkout@v3
         with:
           repository: ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
@@ -88,10 +85,23 @@ jobs:
           
           cd source
           
-          sourceBranch=$(git branch -vv | grep -Po "^[\s\*]*\K[^\s]*(?=.*$(git branch -rl '*/HEAD' | grep -o '[^ ]\+$'))")
+          git branch -rl
+          
+          # sourceBranch=$(git branch -vv | grep -Po "^[\s\*]*\K[^\s]*(?=.*$(git branch -rl '*/HEAD' | grep -o '[^ ]\+$'))")
+          sourceBranch=$(git rev-parse --abbrev-ref origin/HEAD | cut -c8-)
+          
           echo "Source repository main branch: $sourceBranch"
           
-          echo "SOURCE_BRANCH=$sourceBranch" >> $GITHUB_ENV
+          # Throw if branch default branch was most definitely incorrect
+          if [ $sourceBranch -eq "master" ] ||  [ $sourceBranch -eq "main ]; then
+              echo "SOURCE_BRANCH=$sourceBranch" >> $GITHUB_ENV
+              echo "Set SOURCE_BRANCH env var to $sourceBranch"
+          else
+              echo "::error::Failed to detect default branch from source repo. Got: $sourceBranch"
+              exit 1
+          fi
+          
+          #echo "SOURCE_BRANCH=$sourceBranch" >> $GITHUB_ENV
           
           git fetch --all --tags
           
