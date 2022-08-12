@@ -54,7 +54,7 @@ function CreateRepoPipelineRewireScript
 
     if($BitbucketRepo) 
     {
-        $sourceRepoLabel="$BitbucketWorkspace/$BitbucketRepository"
+        $sourceRepoLabel="$BitbucketWorkspace/$BitbucketRepo"
         $pipelines = az pipelines list --org $AzureOrgUrl --project $AzureProject --repository-type Bitbucket --repository $BitbucketWorkspace/$BitbucketRepo `
             | jq -c | ConvertFrom-Json
     }
