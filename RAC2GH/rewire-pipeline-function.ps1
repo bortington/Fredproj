@@ -60,19 +60,22 @@ function RewirePipeline
     # Use random prefix to prevent contamination from other pipelines
     $filePrefix = "$AzureOrganization-$AzureProject-$PipelineId-$(New-Guid)"
     
-    $url = "https://dev.azure.com/$AzureOrganization/$AzureProject/_apis/build/definitions/$($PipelineId)?api-version=6.0";
-    $authHeader = "Authorization: Basic $([Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("pat:$($env:AzurePAT)")))"
+    $encodedProject = [uri]::EscapeDataString($AzureProject)
+
+    $url = "https://dev.azure.com/$AzureOrganization/$encodedProject/_apis/build/definitions/$($PipelineId)?api-version=6.0";
+    $headers = @{
+        'Authorization' = "Basic $([Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("pat:$($env:AzurePAT)")))"
+    }
 
     try
     {
         # Store data as json to pass into jq later
         ConvertTo-Json $newData | Out-File -FilePath "$filePrefix-newData.json"
 
-        # Get the pipelines current state and store in file for later user with jq
-        curl -s --location --request GET $url --header $authHeader `
-            | jq `
-            | Out-File -FilePath "$filePrefix-data.json"
-        
+        # Get the pipelines current state and store in file for later use
+        $response = Invoke-WebRequest -Uri $url -Method Get -Headers $headers
+        $($response.Content) | jq | Out-File -FilePath "$filePrefix-data.json"
+
         # Take original data, remove .repository, and add new data to the object. Then we add the original clean and checkoutSubmodules values
         $data = jq -c -n --argfile newData "$filePrefix-newData.json" --argfile data "$filePrefix-data.json" '$data | del(.repository) * $newData | .repository += {clean: $data.repository.clean, checkoutSubmodules: $data.repository.checkoutSubmodules}'
         $pipelineName = $data | jq '.name'
@@ -90,7 +93,10 @@ function RewirePipeline
 
     if(-not $DryRun)
     {
-        curl $url --verbose --header 'Content-Type: application/json' --request PUT --header $authHeader --data "@$filePrefix-newPipeline.json"
+        $headers['Content-Type'] = "application/json"
+        $response = Invoke-RestMethod -Uri $url -Method Put -Headers $headers -Body $data
+
+        Write-Output $response
     }
     else {
         Write-Output "Dry run mode enabled. No changes have been submitted"
