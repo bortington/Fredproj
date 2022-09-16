@@ -43,12 +43,10 @@ jobs:
     runs-on: windows-2022
     steps:
     - name: Azure DevOps Login
-      shell: pwsh
+      shell: bash
       run: |      
-        winget -v
-        
-        echo "${{secrets.RAC2GH_AZURE_DEVOPS_PIPELINE_MIGRATION_TOKEN}}" | az devops login --organization https://dev.azure.com/${{env.DEVOPS_ORG}}
-        #echo "AZURE_DEVOPS_EXT_PAT=${{secrets.RAC2GH_AZURE_DEVOPS_PIPELINE_MIGRATION_TOKEN}}" > $GITHUB_ENV
+        #echo "${{secrets.RAC2GH_AZURE_DEVOPS_PIPELINE_MIGRATION_TOKEN}}" | az devops login --organization https://dev.azure.com/${{env.DEVOPS_ORG}}
+        echo "AZURE_DEVOPS_EXT_PAT=${{secrets.RAC2GH_AZURE_DEVOPS_PIPELINE_MIGRATION_TOKEN}}" > $GITHUB_ENV
       
     - name: Checkout
       uses: actions/checkout@v3
