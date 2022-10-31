@@ -29,6 +29,7 @@ on:
       add-to-codacy:
         description: Add the GitHub repo to Codacy? (Note that Codacy gates could prevent the migration branch being merged)
         required: true
+        default: true
         type: boolean
       push-changes:
         description: Confirm. (Leaving this unticked will perform a dry run)
