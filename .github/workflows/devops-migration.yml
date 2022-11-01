@@ -161,6 +161,8 @@ jobs:
       - name: "Set Env Variables for Codacy"
         shell: bash
         if: ${{ inputs.push-changes }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.RAC2GH_GITHUB_TOKEN }}
         run: |
           echo "CODACY_ORGANIZATION_PROVIDER=$(if [[ $GITHUB_SERVER_URL == "https://github.com" ]]; then echo "gh"; else echo "ghe"; fi)" >> $GITHUB_ENV
           echo "CODACY_USERNAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 1)" >> $GITHUB_ENV
