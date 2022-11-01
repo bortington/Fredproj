@@ -143,6 +143,20 @@ jobs:
         run: |
           git push --tags --set-upstream origin migration
           git push --all origin           
+            
+      - name: "Set Env Variables for Codacy"
+        shell: bash
+        if: ${{ inputs.push-changes }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.RAC2GH_GITHUB_TOKEN }}
+        run: |
+          echo "CODACY_ORGANIZATION_PROVIDER=$(if [[ $GITHUB_SERVER_URL == "https://github.com" ]]; then echo "gh"; else echo "ghe"; fi)" >> $GITHUB_ENV
+          echo "CODACY_USERNAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 1)" >> $GITHUB_ENV
+          
+          echo "CODACY_REPO=$(gh api "/repos/${{env.GITHUB_ORG}}/${{inputs.github-repo}}" | jq '.name' -r)" >> $GITHUB_ENV
+          
+          repoName="${{inputs.github-repo}}"
+          echo "CODACY_PROJECT_NAME=${repoName^}" >> $GITHUB_ENV         
           
       - name: Create Codacy Project if necessary
         shell: pwsh
@@ -206,19 +220,6 @@ jobs:
             --draft \
             --repo ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
             
-      - name: "Set Env Variables for Codacy"
-        shell: bash
-        if: ${{ inputs.push-changes }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.RAC2GH_GITHUB_TOKEN }}
-        run: |
-          echo "CODACY_ORGANIZATION_PROVIDER=$(if [[ $GITHUB_SERVER_URL == "https://github.com" ]]; then echo "gh"; else echo "ghe"; fi)" >> $GITHUB_ENV
-          echo "CODACY_USERNAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 1)" >> $GITHUB_ENV
-          
-          echo "CODACY_REPO=$(gh api "/repos/${{env.GITHUB_ORG}}/${{inputs.github-repo}}" | jq '.name' -r)" >> $GITHUB_ENV
-          
-          repoName="${{inputs.github-repo}}"
-          echo "CODACY_PROJECT_NAME=${repoName^}" >> $GITHUB_ENV         
       - name: Generate Codacy Project Token
         if: ${{ inputs.push-changes }}
         shell: pwsh
