@@ -165,8 +165,11 @@ jobs:
           echo "CODACY_ORGANIZATION_PROVIDER=$(if [[ $GITHUB_SERVER_URL == "https://github.com" ]]; then echo "gh"; else echo "ghe"; fi)" >> $GITHUB_ENV
           echo "CODACY_USERNAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 1)" >> $GITHUB_ENV
           
+          echo "CODACY_REPO=$(gh api "/repos/${{env.GITHUB_ORG}}/${{inputs.github-repo}}" | jq '.name')" >> $GITHUB_ENV
+          
           repoName="${{inputs.github-repo}}"
           echo "CODACY_PROJECT_NAME=${repoName^}" >> $GITHUB_ENV
+          
           
       - name: Create Codacy Project if necessary
         shell: pwsh
@@ -179,7 +182,7 @@ jobs:
           $headers.Add("Content-Type", "application/json")
 
           $body = @{
-            repositoryFullPath = "$env:CODACY_USERNAME/$env:CODACY_PROJECT_NAME"
+            repositoryFullPath = "$env:CODACY_USERNAME/$env:CODACY_REPO"
             provider = $env:CODACY_ORGANIZATION_PROVIDER
           } | ConvertTo-Json
           Write-Host "Sending request with body: $body"
@@ -200,7 +203,7 @@ jobs:
             }
           } | ConvertTo-Json
 
-          $response = Invoke-RestMethod "https://app.codacy.com/api/v3/organizations/${{env.CODACY_ORGANIZATION_PROVIDER}}/${{env.CODACY_USERNAME}}/repositories/${{env.CODACY_PROJECT_NAME}}/settings/quality/pull-requests" -Method 'PUT' -Headers $headers -Body $body
+          $response = Invoke-RestMethod "https://app.codacy.com/api/v3/organizations/${{env.CODACY_ORGANIZATION_PROVIDER}}/${{env.CODACY_USERNAME}}/repositories/${{env.CODACY_REPO}}/settings/quality/pull-requests" -Method 'PUT' -Headers $headers -Body $body
           Write-Host Response: $statusCodeInt
           Write-Host $response
 
@@ -208,9 +211,9 @@ jobs:
         if: ${{ inputs.push-changes }}
         shell: pwsh
         run: |
-          $projectName = "${{env.CODACY_PROJECT_NAME}}".Split('/')[-1]
+          $projectName = "${{env.CODACY_REPO}}".Split('/')[-1]
           $projectName = $projectName.ToLower()
-          $uri = "https://app.codacy.com/api/v3/organizations/${{env.CODACY_ORGANIZATION_PROVIDER}}/${{env.CODACY_USERNAME}}/repositories/$projectName/tokens"
+          $uri = "https://app.codacy.com/api/v3/organizations/${{env.CODACY_ORGANIZATION_PROVIDER}}/${{env.CODACY_USERNAME}}/repositories/${{env.CODACY_REPO}}/tokens"
 
           Write-Host "Generating a Codacy Project API Token for repository"
 
