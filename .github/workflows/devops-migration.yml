@@ -40,7 +40,7 @@ env:
   DEVOPS_ORG: bertington
 
 jobs:
-  clone-and-merge: # This job is run manually
+  clone-and-merge:
     runs-on: ubuntu-latest
     steps:
       - run: |
