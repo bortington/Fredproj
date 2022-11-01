@@ -30,12 +30,8 @@ on:
         description: Migrate all branches.
         required: true
         type: boolean
-      add-to-codacy:
-        description: Add the GitHub repo to Codacy?
-        required: true
-        type: boolean
       push-changes:
-        description: 'Whether we will push changes. When disabled this will perform a dry run'
+        description: Confirm? (Leaving this unticked will perform a dry run)
         required: true
         type: boolean
 
