@@ -44,7 +44,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-      
           devopsRepo='https://${{env.DEVOPS_ORG}}@dev.azure.com/${{env.DEVOPS_ORG}}/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }}'
           authValue=`printf "pat:${{secrets.RAC2GH_AZURE_DEVOPS_TOKEN}}" | iconv -f ASCII -t UTF-8 | base64`
 
@@ -76,7 +75,6 @@ jobs:
           
       - shell: bash
         run: |
-      
           echo "Cloning repo..."
           git clone -c http.extraHeader="AUTHORIZATION: Basic ${{env.SOURCE_AUTH_B64PAT}}" --mirror https://${{env.DEVOPS_ORG}}@dev.azure.com/${{env.DEVOPS_ORG}}/${{ inputs.azure-project }}/_git/${{ inputs.azure-repo }} source
          
