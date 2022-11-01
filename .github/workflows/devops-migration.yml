@@ -145,18 +145,6 @@ jobs:
         run: |
           git push --tags --set-upstream origin $MIGRATION_BRANCH
           git push --all origin
-          
-      - name: Create Pull Request
-        if: ${{ inputs.push-changes }}
-        working-directory: target
-        env:
-          GITHUB_TOKEN: ${{ secrets.RAC2GH_GITHUB_TOKEN }}
-        run: |
-          gh pr create \
-            --title "DevOps Migration from ${{inputs.azure-project}}/${{inputs.azure-repo}}" \
-            --body "Automated PR from Migration Workflow" \
-            --draft \
-            --repo ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
             
       - name: "Set Env Variables for Codacy"
         shell: bash
@@ -171,8 +159,7 @@ jobs:
           
           repoName="${{inputs.github-repo}}"
           echo "CODACY_PROJECT_NAME=${repoName^}" >> $GITHUB_ENV
-          
-          
+                    
       - name: Create Codacy Project if necessary
         shell: pwsh
         if: ${{ inputs.push-changes }}
@@ -222,7 +209,19 @@ jobs:
 
           $response = Invoke-RestMethod "https://app.codacy.com/api/v3/organizations/${{env.CODACY_ORGANIZATION_PROVIDER}}/${{env.CODACY_USERNAME}}/repositories/${{env.CODACY_REPO}}/settings/quality/commits" -Method 'PUT' -Headers $headers -Body $body
           Write-Host "Setting Codacy commit quality gate: $statusCodeInt"
-
+          
+      - name: Create Pull Request
+        if: ${{ inputs.push-changes }}
+        working-directory: target
+        env:
+          GITHUB_TOKEN: ${{ secrets.RAC2GH_GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --title "DevOps Migration from ${{inputs.azure-project}}/${{inputs.azure-repo}}" \
+            --body "Automated PR from Migration Workflow" \
+            --draft \
+            --repo ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
+            
       - name: Generate Codacy Project Token
         if: ${{ inputs.push-changes }}
         shell: pwsh
