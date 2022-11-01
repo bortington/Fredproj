@@ -162,31 +162,82 @@ jobs:
             
       - name: "Set Env Variables for Codacy"
         shell: bash
-        if: ${{ inputs.add-to-codacy && inputs.add-to-codacy }}
+        if: ${{ inputs.push-changes }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.RAC2GH_GITHUB_TOKEN }}
         run: |
           echo "CODACY_ORGANIZATION_PROVIDER=$(if [[ $GITHUB_SERVER_URL == "https://github.com" ]]; then echo "gh"; else echo "ghe"; fi)" >> $GITHUB_ENV
           echo "CODACY_USERNAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 1)" >> $GITHUB_ENV
-          echo "CODACY_PROJECT_NAME=${{inputs.github-repo}}" >> $GITHUB_ENV
+          
+          echo "CODACY_REPO=$(gh api "/repos/${{env.GITHUB_ORG}}/${{inputs.github-repo}}" | jq '.name' -r)" >> $GITHUB_ENV
+          
+          repoName="${{inputs.github-repo}}"
+          echo "CODACY_PROJECT_NAME=${repoName^}" >> $GITHUB_ENV          
           
       - name: Create Codacy Project if necessary
         shell: pwsh
-        if: ${{ inputs.add-to-codacy && inputs.add-to-codacy }}
+        if: ${{ inputs.push-changes }}
         run: |
-              $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-              $headers.Add("api-token", "${{ secrets.CODACY_API_TOKEN }}")
-              $headers.Add("caller", "string")
-              $headers.Add("Content-Type", "application/json")
-              $body = @{
-                repositoryFullPath = "$env:CODACY_USERNAME/$env:CODACY_PROJECT_NAME"
-                provider = $env:CODACY_ORGANIZATION_PROVIDER
-              } | ConvertTo-Json
-              Write-Host "Sending request with body: $body"
-              try {
-                $response = Invoke-RestMethod 'https://app.codacy.com/api/v3/repositories' -Method 'POST' -Headers $headers -Body $body -SkipHttpErrorCheck
-              } catch [System.Net.WebException] {
-                Write-Host "An exception was caught: $($_.Exception.Message)"
-              }
-              $statusCodeInt = [int]$response.BaseResponse.StatusCode
-              Write-Host Response: $statusCodeInt
-              Write-Host $response
-              $response | ConvertTo-Json
+          # Common headers
+          $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+          $headers.Add("api-token", "${{ secrets.CODACY_API_TOKEN }}")
+          $headers.Add("caller", "string")
+          $headers.Add("Content-Type", "application/json")
+
+          # Add the repo to Codacy
+          $body = @{
+            repositoryFullPath = "$env:CODACY_USERNAME/$env:CODACY_REPO"
+            provider = $env:CODACY_ORGANIZATION_PROVIDER
+          } | ConvertTo-Json
+          Write-Host "Sending request with body: $body"
+          try {
+            $response = Invoke-RestMethod 'https://app.codacy.com/api/v3/repositories' -Method 'POST' -Headers $headers -Body $body -SkipHttpErrorCheck
+          } catch [System.Net.WebException] {
+            Write-Host "An exception was caught: $($_.Exception.Message)"
+          }
+          $statusCodeInt = [int]$response.BaseResponse.StatusCode
+          Write-Host Response: $statusCodeInt
+          Write-Host $response
+
+          # Set default PR checks to something somewhat flexible for migration - forcing any security issues to be addressed but only block on critical issues
+          # See: https://api.codacy.com/api/api-docs#updatepullrequestqualitysettings
+          $body = @{ 
+            issueThreshold = @{
+              threshold = 0
+              minimumSeverity = "Error"
+            }
+            securityIssueThreshold = 0
+          } | ConvertTo-Json
+
+          $response = Invoke-RestMethod "https://app.codacy.com/api/v3/organizations/${{env.CODACY_ORGANIZATION_PROVIDER}}/${{env.CODACY_USERNAME}}/repositories/${{env.CODACY_REPO}}/settings/quality/pull-requests" -Method 'PUT' -Headers $headers -Body $body
+          Write-Host Response: $statusCodeInt
+          Write-Host $response
+
+      - name: Generate Codacy Project Token
+        if: ${{ inputs.push-changes }}
+        shell: pwsh
+        run: |
+          $projectName = "${{env.CODACY_REPO}}".Split('/')[-1]
+          $projectName = $projectName.ToLower()
+          $uri = "https://app.codacy.com/api/v3/organizations/${{env.CODACY_ORGANIZATION_PROVIDER}}/${{env.CODACY_USERNAME}}/repositories/${{env.CODACY_REPO}}/tokens"
+
+          Write-Host "Generating a Codacy Project API Token for repository"
+
+          $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+          $headers.Add("api-token", "${{ secrets.CODACY_API_TOKEN }}")
+          $headers.Add("caller", "string")
+          $headers.Add("Content-Type", "application/json")
+          Write-Host "Sending request"
+          try {
+            $response = Invoke-RestMethod -Uri $uri -Method 'POST' -Headers $headers -SkipHttpErrorCheck
+            Write-Host $response
+
+            if($response.PSobject.Properties.Name -contains "error")
+            {
+              throw $response
+            }
+
+          } catch [System.Net.WebException] {
+            Write-Host "An exception was caught: $($_.Exception.Message)"
+            throw
+          }
