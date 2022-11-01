@@ -210,7 +210,7 @@ jobs:
         run: |
           $projectName = "${{env.CODACY_PROJECT_NAME}}".Split('/')[-1]
           $projectName = $projectName.ToLower()
-          $uri = "https://app.codacy.com/api/v3/organizations/${{env.CODACY_ORGANIZATION_PROVIDER}}/${{env.CODACY_ORGANIZATION_PROVIDER}}/repositories/$projectName/tokens"
+          $uri = "https://app.codacy.com/api/v3/organizations/${{env.CODACY_ORGANIZATION_PROVIDER}}/${{env.CODACY_USERNAME}}/repositories/$projectName/tokens"
 
           Write-Host "Generating a Codacy Project API Token for repository"
 
