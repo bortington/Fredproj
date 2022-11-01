@@ -158,9 +158,10 @@ jobs:
           repoName="${{inputs.github-repo}}"
           echo "CODACY_PROJECT_NAME=${repoName^}" >> $GITHUB_ENV         
           
-      - name: Create Codacy Project if necessary
+      - name: Codacy
         shell: pwsh
         if: ${{ inputs.push-changes }}
+        continue-on-error: true
         run: |
           # Common headers
           $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
