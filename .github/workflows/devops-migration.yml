@@ -200,7 +200,7 @@ jobs:
             }
           }
 
-          $response = Invoke-RestMethod "https://app.codacy.com/api/v3/organizations/${{env.CODACY_ORGANIZATION_PROVIDER}}/${{env.CODACY_USERNAME}}/repositories/${{env.CODACY_PROJECT_NAME}}/settings/quality/pull-requests" -Method 'PUT' -Headers $headers
+          $response = Invoke-RestMethod "https://app.codacy.com/api/v3/organizations/${{env.CODACY_ORGANIZATION_PROVIDER}}/${{env.CODACY_USERNAME}}/repositories/${{env.CODACY_PROJECT_NAME}}/settings/quality/pull-requests" -Method 'PUT' -Headers $headers -Body $body
           Write-Host Response: $statusCodeInt
           Write-Host $response
 
