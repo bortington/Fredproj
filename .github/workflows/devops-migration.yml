@@ -177,12 +177,13 @@ jobs:
         shell: pwsh
         if: ${{ inputs.push-changes }}
         run: |
-          # Add the repo to Codacy
+          # Common headers
           $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
           $headers.Add("api-token", "${{ secrets.CODACY_API_TOKEN }}")
           $headers.Add("caller", "string")
           $headers.Add("Content-Type", "application/json")
 
+          # Add the repo to Codacy
           $body = @{
             repositoryFullPath = "$env:CODACY_USERNAME/$env:CODACY_REPO"
             provider = $env:CODACY_ORGANIZATION_PROVIDER
@@ -197,12 +198,14 @@ jobs:
           Write-Host Response: $statusCodeInt
           Write-Host $response
 
-          # Set default PR checks to something soemwhat flexible for migration - forcing any security issues to be addressed and only critical non-security issues
+          # Set default PR checks to something somewhat flexible for migration - forcing any security issues to be addressed but only block on critical issues
+          # See: https://api.codacy.com/api/api-docs#updatepullrequestqualitysettings
           $body = @{ 
             issueThreshold = @{
               threshold = 0
               minimumSeverity = "Error"
             }
+            securityIssueThreshold = 0
           } | ConvertTo-Json
 
           $response = Invoke-RestMethod "https://app.codacy.com/api/v3/organizations/${{env.CODACY_ORGANIZATION_PROVIDER}}/${{env.CODACY_USERNAME}}/repositories/${{env.CODACY_REPO}}/settings/quality/pull-requests" -Method 'PUT' -Headers $headers -Body $body
