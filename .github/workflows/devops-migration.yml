@@ -167,7 +167,7 @@ jobs:
           echo "CODACY_ORGANIZATION_PROVIDER=$(if [[ $GITHUB_SERVER_URL == "https://github.com" ]]; then echo "gh"; else echo "ghe"; fi)" >> $GITHUB_ENV
           echo "CODACY_USERNAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 1)" >> $GITHUB_ENV
           
-          echo "CODACY_REPO=$(gh api "/repos/${{env.GITHUB_ORG}}/${{inputs.github-repo}}" | jq '.name')" >> $GITHUB_ENV
+          echo "CODACY_REPO=$(gh api "/repos/${{env.GITHUB_ORG}}/${{inputs.github-repo}}" | jq '.name' -r)" >> $GITHUB_ENV
           
           repoName="${{inputs.github-repo}}"
           echo "CODACY_PROJECT_NAME=${repoName^}" >> $GITHUB_ENV
