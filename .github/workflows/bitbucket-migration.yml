@@ -142,33 +142,7 @@ jobs:
         if: ${{ inputs.push-changes }}
         run: |
           git push --tags --set-upstream origin migration
-          git push --all origin
-          
-      - name: Create Pull Request
-        if: ${{ inputs.push-changes }}
-        working-directory: target
-        env:
-          GITHUB_TOKEN: ${{ secrets.RAC2GH_GITHUB_TOKEN }}
-        run: |
-          gh pr create \
-            --title "Bitbucket Migration from ${{env.BITBUCKET_WORKSPACE}}/${{inputs.bitbucket-repo}}" \
-            --body "Automated PR from Migration Workflow" \
-            --draft \
-            --repo ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
-            
-      - name: "Set Env Variables for Codacy"
-        shell: bash
-        if: ${{ inputs.push-changes }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.RAC2GH_GITHUB_TOKEN }}
-        run: |
-          echo "CODACY_ORGANIZATION_PROVIDER=$(if [[ $GITHUB_SERVER_URL == "https://github.com" ]]; then echo "gh"; else echo "ghe"; fi)" >> $GITHUB_ENV
-          echo "CODACY_USERNAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 1)" >> $GITHUB_ENV
-          
-          echo "CODACY_REPO=$(gh api "/repos/${{env.GITHUB_ORG}}/${{inputs.github-repo}}" | jq '.name' -r)" >> $GITHUB_ENV
-          
-          repoName="${{inputs.github-repo}}"
-          echo "CODACY_PROJECT_NAME=${repoName^}" >> $GITHUB_ENV          
+          git push --all origin           
           
       - name: Create Codacy Project if necessary
         shell: pwsh
@@ -206,9 +180,45 @@ jobs:
           } | ConvertTo-Json
 
           $response = Invoke-RestMethod "https://app.codacy.com/api/v3/organizations/${{env.CODACY_ORGANIZATION_PROVIDER}}/${{env.CODACY_USERNAME}}/repositories/${{env.CODACY_REPO}}/settings/quality/pull-requests" -Method 'PUT' -Headers $headers -Body $body
-          Write-Host Response: $statusCodeInt
-          Write-Host $response
+          Write-Host "Setting Codacy PR quality gate: $statusCodeInt"
+          
+          # Set default commit checks
+          $body = @{ 
+            issueThreshold = @{
+              threshold = 0
+              minimumSeverity = "Error"
+            }
+            securityIssueThreshold = 0
+          } | ConvertTo-Json
 
+          $response = Invoke-RestMethod "https://app.codacy.com/api/v3/organizations/${{env.CODACY_ORGANIZATION_PROVIDER}}/${{env.CODACY_USERNAME}}/repositories/${{env.CODACY_REPO}}/settings/quality/commits" -Method 'PUT' -Headers $headers -Body $body
+          Write-Host "Setting Codacy commit quality gate: $statusCodeInt"
+
+      - name: Create Pull Request
+        if: ${{ inputs.push-changes }}
+        working-directory: target
+        env:
+          GITHUB_TOKEN: ${{ secrets.RAC2GH_GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --title "Bitbucket Migration from ${{env.BITBUCKET_WORKSPACE}}/${{inputs.bitbucket-repo}}" \
+            --body "Automated PR from Migration Workflow" \
+            --draft \
+            --repo ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
+            
+      - name: "Set Env Variables for Codacy"
+        shell: bash
+        if: ${{ inputs.push-changes }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.RAC2GH_GITHUB_TOKEN }}
+        run: |
+          echo "CODACY_ORGANIZATION_PROVIDER=$(if [[ $GITHUB_SERVER_URL == "https://github.com" ]]; then echo "gh"; else echo "ghe"; fi)" >> $GITHUB_ENV
+          echo "CODACY_USERNAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 1)" >> $GITHUB_ENV
+          
+          echo "CODACY_REPO=$(gh api "/repos/${{env.GITHUB_ORG}}/${{inputs.github-repo}}" | jq '.name' -r)" >> $GITHUB_ENV
+          
+          repoName="${{inputs.github-repo}}"
+          echo "CODACY_PROJECT_NAME=${repoName^}" >> $GITHUB_ENV         
       - name: Generate Codacy Project Token
         if: ${{ inputs.push-changes }}
         shell: pwsh
