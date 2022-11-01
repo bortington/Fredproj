@@ -26,11 +26,6 @@ on:
         description: Migrate all branches? When false only the default branch is migrated.
         required: true
         type: boolean
-      add-to-codacy:
-        description: Add the GitHub repo to Codacy? (Note that Codacy gates could prevent the migration branch being merged)
-        required: true
-        default: true
-        type: boolean
       push-changes:
         description: Confirm. (Leaving this unticked will perform a dry run)
         required: true
@@ -167,20 +162,24 @@ jobs:
             
       - name: "Set Env Variables for Codacy"
         shell: bash
-        if: ${{ inputs.add-to-codacy && inputs.add-to-codacy }}
+        if: ${{ inputs.push-changes }}
         run: |
           echo "CODACY_ORGANIZATION_PROVIDER=$(if [[ $GITHUB_SERVER_URL == "https://github.com" ]]; then echo "gh"; else echo "ghe"; fi)" >> $GITHUB_ENV
           echo "CODACY_USERNAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 1)" >> $GITHUB_ENV
-          echo "CODACY_PROJECT_NAME=${{inputs.github-repo}}" >> $GITHUB_ENV
+          
+          repoName="${{inputs.github-repo}}"
+          echo "CODACY_PROJECT_NAME=${repoName^}" >> $GITHUB_ENV
           
       - name: Create Codacy Project if necessary
         shell: pwsh
-        if: ${{ inputs.add-to-codacy && inputs.add-to-codacy }}
+        if: ${{ inputs.push-changes }}
         run: |
+              # Add the repo to Codacy
               $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
               $headers.Add("api-token", "${{ secrets.CODACY_API_TOKEN }}")
               $headers.Add("caller", "string")
               $headers.Add("Content-Type", "application/json")
+                            
               $body = @{
                 repositoryFullPath = "$env:CODACY_USERNAME/$env:CODACY_PROJECT_NAME"
                 provider = $env:CODACY_ORGANIZATION_PROVIDER
@@ -194,4 +193,44 @@ jobs:
               $statusCodeInt = [int]$response.BaseResponse.StatusCode
               Write-Host Response: $statusCodeInt
               Write-Host $response
-              $response | ConvertTo-Json
+              
+              # Set default PR checks to something soemwhat flexible for migration - forcing any security issues to be addressed and only critical non-security issues
+              $body = @{ 
+                issueThreshold = @{
+                  threshold = 0
+                  minimumSeverity = "Error"
+                }
+              }
+              
+              $response = Invoke-RestMethod "https://app.codacy.com/api/v3/organizations/${{env.CODACY_ORGANIZATION_PROVIDER}}/${{env.CODACY_USERNAME}}/repositories/${{env.CODACY_PROJECT_NAME}}/settings/quality/pull-requests" -Method 'PUT' -Headers $headers
+              Write-Host Response: $statusCodeInt
+              Write-Host $response
+
+      - name: Generate Codacy Project Token
+        if: ${{ inputs.push-changes }}
+        shell: pwsh
+        run: |
+              $projectName = "${{env.CODACY_PROJECT_NAME}}".Split('/')[-1]
+              $projectName = $projectName.ToLower()
+              $uri = "https://app.codacy.com/api/v3/organizations/${{env.CODACY_ORGANIZATION_PROVIDER}}/${{env.CODACY_ORGANIZATION_PROVIDER}}/repositories/$projectName/tokens"
+
+              Write-Host "Generating a Codacy Project API Token for repository"
+        
+              $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+              $headers.Add("api-token", "${{ secrets.CODACY_API_TOKEN }}")
+              $headers.Add("caller", "string")
+              $headers.Add("Content-Type", "application/json")
+              Write-Host "Sending request"
+              try {
+                $response = Invoke-RestMethod -Uri $uri -Method 'POST' -Headers $headers -SkipHttpErrorCheck
+                Write-Host $response
+                
+                if($response.PSobject.Properties.Name -contains "error")
+                {
+                  throw $response
+                }
+                
+              } catch [System.Net.WebException] {
+                Write-Host "An exception was caught: $($_.Exception.Message)"
+                throw
+              }
