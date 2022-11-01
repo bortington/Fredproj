@@ -209,8 +209,19 @@ jobs:
           } | ConvertTo-Json
 
           $response = Invoke-RestMethod "https://app.codacy.com/api/v3/organizations/${{env.CODACY_ORGANIZATION_PROVIDER}}/${{env.CODACY_USERNAME}}/repositories/${{env.CODACY_REPO}}/settings/quality/pull-requests" -Method 'PUT' -Headers $headers -Body $body
-          Write-Host Response: $statusCodeInt
-          Write-Host $response
+          Write-Host "Setting Codacy PR quality gate: $statusCodeInt"
+          
+          # Set default commit checks
+          $body = @{ 
+            issueThreshold = @{
+              threshold = 0
+              minimumSeverity = "Error"
+            }
+            securityIssueThreshold = 0
+          } | ConvertTo-Json
+
+          $response = Invoke-RestMethod "https://app.codacy.com/api/v3/organizations/${{env.CODACY_ORGANIZATION_PROVIDER}}/${{env.CODACY_USERNAME}}/repositories/${{env.CODACY_REPO}}/settings/quality/commits" -Method 'PUT' -Headers $headers -Body $body
+          Write-Host "Setting Codacy commit quality gate: $statusCodeInt"
 
       - name: Generate Codacy Project Token
         if: ${{ inputs.push-changes }}
