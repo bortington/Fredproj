@@ -102,9 +102,8 @@ jobs:
           git lfs fetch source --all
           git checkout -b $MIGRATION_BRANCH
           
-          mergeMessage="Merging from migration workflow from ${{env.SOURCE_GIT_URL}}
-          [skip ci]
-          "
+          mergeMessage="Merging from migration workflow from ${{env.SOURCE_GIT_URL}} by ${{github.actor}} [skip ci]"
+          
           echo "Merging source main branch into destination"
           git merge source/$SOURCE_BRANCH --allow-unrelated-histories -X theirs -m $mergeMessage
 
