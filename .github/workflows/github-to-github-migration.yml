@@ -14,10 +14,10 @@ on:
   workflow_dispatch:
     inputs:
       source-github-repo:
-        description: Full github url , for example: https://github.com/racwa/sample-repo.git
+        description: 'Full github url , for example: https://github.com/racwa/sample-repo.git'
         required: true
       github-repo:
-        description: Destination repo name. This is _not_ the full path. Example value: test-target
+        description: 'Destination repo name. This is _not_ the full path. Example value: test-target'
         required: true
       push-branches:
         description: Migrate all branches? When false only the default branch is migrated.
@@ -149,7 +149,7 @@ jobs:
         run: |
           gh pr create \
             --title "GitHub Migration from ${{env.SOURCE_GIT_URL}} by ${{github.actor}}" \
-            --body "Automated PR from GitHub -> GitHub Migration Workflow" \
+            --body "Automated PR from GitHub -> GitHub Migration Workflow \n Branch: ${{env.SOURCE_BRANCH}}" \
             --draft \
             --repo ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
 
