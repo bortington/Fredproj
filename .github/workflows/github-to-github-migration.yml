@@ -42,7 +42,7 @@ jobs:
       - run: |
           sourceRepoUrl='https://github.com/${{env.GITHUB_ORG}}/${{inputs.source-github-repo}}.git'
           
-          git config --global url."https://${{secrets.RAC2GH_GITHUB_TOKEN }}@${{inputs.source-github-repo}}.git".InsteadOf $sourceRepoUrl
+          git config --global url."https://${{secrets.RAC2GH_GITHUB_TOKEN }}@github.com/${{env.GITHUB_ORG}}/${{inputs.source-github-repo}}.git".InsteadOf $sourceRepoUrl
           
           echo "Source Repo: $sourceRepoUrl"
           echo "SOURCE_GIT_URL=$sourceRepoUrl" >> $GITHUB_ENV
