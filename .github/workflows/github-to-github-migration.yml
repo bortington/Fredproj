@@ -149,7 +149,7 @@ jobs:
         run: |
           gh pr create \
             --title "GitHub Migration from ${{env.SOURCE_GIT_URL}} by ${{github.actor}}" \
-            --body "Automated PR from GitHub -> GitHub Migration Workflow \n Branch: ${{env.SOURCE_BRANCH}}" \
+            --body "Automated PR from GitHub -> GitHub Migration Workflow. Source branch: ${{env.SOURCE_BRANCH}}" \
             --draft \
             --repo ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
 
