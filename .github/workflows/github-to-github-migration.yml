@@ -1,12 +1,8 @@
-# This dispatched workflow merges an Azure repository into an existing GitHub repository and creates a PR.
-# See: https://rac-wa.atlassian.net/wiki/spaces/DEVX/pages/2816082081/Migrate+from+Azure+DevOps
+# This dispatched workflow merges one GitHub repo into another GitHub repo and creates a PR
 #
 # Secrets:
 #   RAC2GH_GITHUB_TOKEN
 #     GitHub PAT required to push commits to the repo and create a new PR
-#
-#   RAC2GH_AZURE_DEVOPS_TOKEN
-#     The PAT used to clone the repo from devops. This needs Code(Read)
 
 name: 'RAC2GH: Migrate repo from GitHub to GitHub'
 
@@ -152,4 +148,3 @@ jobs:
             --body "Automated PR from GitHub -> GitHub Migration Workflow. Source branch: ${{env.SOURCE_BRANCH}}" \
             --draft \
             --repo ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
-
