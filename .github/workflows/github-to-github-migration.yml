@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       source-github-repo:
-        description: 'Full github url , for example: https://github.com/racwa/sample-repo.git'
+        description: 'Source GitHub repo name. Example value: sample-source'
         required: true
       github-repo:
         description: 'Destination repo name. This is _not_ the full path. Example value: test-target'
@@ -40,9 +40,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          sourceRepoUrl='https://github.com/${{env.GITHUB_ORG}}/${{inputs.source-github-repo}}'
+          sourceRepoUrl='https://github.com/${{env.GITHUB_ORG}}/${{inputs.source-github-repo}}.git'
           
-          git config --global url."https://x-token-auth:${{ secrets.RAC2GH_GITHUB_TOKEN }}@${{inputs.source-github-url}}".InsteadOf $sourceRepoUrl
+          git config --global url."https://${{secrets.RAC2GH_GITHUB_TOKEN }}@${{inputs.source-github-repo}}.git".InsteadOf $sourceRepoUrl
           
           echo "Source Repo: $sourceRepoUrl"
           echo "SOURCE_GIT_URL=$sourceRepoUrl" >> $GITHUB_ENV
