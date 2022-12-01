@@ -1,4 +1,7 @@
 # This dispatched workflow merges one GitHub repo into another GitHub repo and creates a PR
+# It is intended to handle edge cases where repositories have to be shifted into another existing repo
+# There are some limitations with this and this may fail on branch conflicts
+# Please note that any file conflicts are resolved using the source repo, and these merge changes may go unnoticed.
 #
 # Secrets:
 #   RAC2GH_GITHUB_TOKEN
