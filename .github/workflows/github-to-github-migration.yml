@@ -1,0 +1,155 @@
+# This dispatched workflow merges an Azure repository into an existing GitHub repository and creates a PR.
+# See: https://rac-wa.atlassian.net/wiki/spaces/DEVX/pages/2816082081/Migrate+from+Azure+DevOps
+#
+# Secrets:
+#   RAC2GH_GITHUB_TOKEN
+#     GitHub PAT required to push commits to the repo and create a new PR
+#
+#   RAC2GH_AZURE_DEVOPS_TOKEN
+#     The PAT used to clone the repo from devops. This needs Code(Read)
+
+name: 'RAC2GH: Migrate repo from Azure DevOps'
+
+on:
+  workflow_dispatch:
+    inputs:
+      source-github-repo:
+        description: Full github url , for example: https://github.com/racwa/sample-repo.git
+        required: true
+      github-repo:
+        description: Destination repo name. This is _not_ the full path. Example value: test-target
+        required: true
+      push-branches:
+        description: Migrate all branches? When false only the default branch is migrated.
+        required: true
+        type: boolean
+      push-changes:
+        description: Confirm. (Leaving this unticked will perform a dry run)
+        required: true
+        type: boolean
+
+# Limit concurrency to 1 per git repo
+concurrency: rac2gh_${{inputs.github-repo}}
+
+env:
+  MIGRATION_BRANCH: migration
+  GITHUB_ORG: bortington
+
+jobs:
+  clone-and-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          sourceRepoUrl='https://github.com/${{env.GITHUB_ORG}}/${{inputs.source-github-repo}}'
+          
+          git config --global url."https://x-token-auth:${{ secrets.RAC2GH_GITHUB_TOKEN }}@${{inputs.source-github-url}}".InsteadOf $sourceRepoUrl
+          
+          echo "Source Repo: $sourceRepoUrl"
+          echo "SOURCE_GIT_URL=$sourceRepoUrl" >> $GITHUB_ENV
+          
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
+          fetch-depth: 0
+          path: target
+          token: ${{ secrets.RAC2GH_GITHUB_TOKEN }}
+          
+      - name: Check branch does not exist
+        working-directory: target
+        shell: bash
+        run: |
+          migrationExists=$(git ls-remote --heads origin $MIGRATION_BRANCH)
+          
+          if [[ -z "$migrationExists" ]]; then
+              echo 'Migration branch does not exist. Continuing'
+          else
+              echo "::error::Migration branch already exists. Please delete this branch and run the workflow again"
+              exit 1
+          fi
+          
+      - shell: bash
+        name: Clone Source
+        run: |
+          echo "Cloning repo..."
+          git clone --mirror ${{env.SOURCE_GIT_URL}} source
+         
+          cd source
+          git --version
+          git remote show origin
+          sourceBranch=$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')
+          echo "Source repository main branch: $sourceBranch"
+          
+          # Throw if default branch was most definitely incorrect
+          if [ "$sourceBranch" == "master" ] || [ "$sourceBranch" == "main" ]; then
+              echo "SOURCE_BRANCH=$sourceBranch" >> $GITHUB_ENV
+              echo "Set SOURCE_BRANCH env var to $sourceBranch"
+          else
+              echo "::error::Failed to detect default branch from source repo. Got: $sourceBranch"
+              exit 1
+          fi
+          
+          git fetch --all --tags
+          
+          echo "Fetching lfs content"
+          git lfs fetch --all
+        
+      - name: Merge source into target
+        working-directory: target
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          
+          echo "Adding source repo as new remote"
+          git remote add source ../source --fetch --tags
+          
+          echo "Fetching lfs content from source mirror repo..."
+          git lfs fetch source --all
+          git checkout -b $MIGRATION_BRANCH
+          
+          echo "Merging source main branch into destination"
+          git merge source/$SOURCE_BRANCH --allow-unrelated-histories -X theirs
+
+          echo "Push branches: '${{inputs.push-branches}}'"
+
+          # Checkout all branch from source remote, excluding the main branch
+          if [ "${{inputs.push-branches}}" == "true" ]
+          then
+            echo "Checking out all branches from source repo"
+            
+            for remote in `git branch -r | grep source/ | grep -v $SOURCE_BRANCH | grep -oP 'source/\K.*'`
+            do 
+              git checkout $remote
+              echo "Checked out $remote"
+            done
+          fi
+
+          git remote remove source
+          
+          # Checkout migration branch again for PR step later on
+          git checkout $MIGRATION_BRANCH
+        
+      - name: Print Diagram
+        working-directory: target
+        run: |
+          echo "### Git Log:" >> $GITHUB_STEP_SUMMARY
+          git log --all --decorate --oneline --graph --date=short --pretty="%ad - %s" >> $GITHUB_STEP_SUMMARY
+    
+      - name: Push Migration Changes
+        working-directory: target
+        if: ${{ inputs.push-changes }}
+        run: |
+          git push --tags --set-upstream origin $MIGRATION_BRANCH
+          git push --all origin
+          
+      - name: Create Pull Request
+        if: ${{ inputs.push-changes }}
+        working-directory: target
+        env:
+          GITHUB_TOKEN: ${{ secrets.RAC2GH_GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --title "GitHub Migration from ${{env.SOURCE_GIT_URL}} by ${{github.actor}}" \
+            --body "Automated PR from GitHub -> GitHub Migration Workflow" \
+            --draft \
+            --repo ${{env.GITHUB_ORG}}/${{inputs.github-repo}}
+
